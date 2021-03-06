@@ -7,11 +7,18 @@
 ################################################################################
 #FUNCTIONS
 updatesystem() {
+if [[ $EUID -ne 0 ]]; then
+tee <<-EOF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⛔  You Must Execute as a SUDO USER (with sudo) or as ROOT!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EOF
+exit 0
+fi
 while true; do
   package_list="update upgrade dist-upgrade autoremove autoclean"
   for i in ${package_list}; do
-      sudo apt $i -yqq 1>/dev/null 2>&1
-      echo "$i is running , please wait"
+      apt $i -yqq 1>/dev/null 2>&1
       sleep 1
   done
   if [[ ! -d "/mnt/downloads" && ! -d "/mnt/unionfs" ]]; then
@@ -26,14 +33,11 @@ while true; do
     done
   fi
   if [[ ! -x "$(command -v docker)"  ]]; then
-     sudo apt-get update -yqq
-     sudo apt-get install \
-          apt-transport-https \
-          ca-certificates \
-          curl \
-          wget \
-          gnupg-agent \
-          software-properties-common -yqq
+     package_list="update apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common"
+     for i in ${package_list}; do
+         apt $i -yqq 1>/dev/null 2>&1
+         sleep 1
+     done
      curl --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
      cp /opt/traefik/templates/local/daemon.j2 /etc/docker/daemon.json
    else
@@ -43,7 +47,7 @@ while true; do
   dockertest=$(systemctl is-active docker | grep "active" && echo true || echo false)
   if [[ $dockertest != "false" ]]; then
      systemctl reload-or-restart docker.service >/dev/null 2>1
-	 systemctl enable docker.service >/dev/null 2>&1
+     systemctl enable docker.service >/dev/null 2>&1
   fi
   mntcheck=$(docker volume ls | grep unionfs | head -n1 && echo true || echo false)
   if [[ $mntcheck == "false" ]]; then
@@ -52,7 +56,7 @@ while true; do
   fi
   networkcheck=$(docker network ls | grep "proxy" | tail -n 2 && echo true || echo false)
   if [[ $networkcheck == "false" ]]; then
-      docker network create --driver=bridge proxy
+     docker network create --driver=bridge proxy
   fi
   if [[ ! -x "$(command -v docker-compose)" ]]; then
      COMPOSE_VERSION=$(curl --silent -fsSL https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
@@ -84,14 +88,18 @@ maxretry = 2
 bantime = 90d
 findtime = 7d
 chain = DOCKER-USER">> /etc/fail2ban/jail.local
+  ##traefik access.log banner
+  sed -i "s#/var/log/traefik/access.log#/opt/appdata/traefik/traefik.log#g" /etc/fail2ban/jail.local
+  sed -i "s#rotate 4#rotate 1#g" /etc/logrotate.conf
+  sed -i "s#weekly#daily#g" /etc/logrotate.conf
   fi
   f2ban=$(systemctl is-active fail2ban | grep "active" && echo true || echo false)
   if [[ $f2ban != "false" ]]; then
      systemctl reload-or-restart fail2ban.service >/dev/null 2>&1
-	 systemctl enable fail2ban.service >/dev/null 2>&1
+     systemctl enable fail2ban.service >/dev/null 2>&1
   fi
   if [[ ! -x "$(command -v rsync)" ]]; then
-      apt-get install rsync -yqq
+      apt install rsync -yqq >/dev/null 2>&1
   fi
   if [[ ! -f "/opt/appdata/authelia/configuration.yml" && ! -f "/opt/appdata/traefik/rules/middlewares.toml" ]]; then
      rsync /opt/traefik/templates/ /opt/appdata/ -aq --info=progress2 -hv --exclude local
@@ -99,27 +107,20 @@ chain = DOCKER-USER">> /etc/fail2ban/jail.local
      rsync /opt/traefik/templates/ /opt/appdata/ -aq --info=progress2 -hv --exclude local
   fi
   if [[ -x "$(command -v rsync)" ]]; then
-      apt-get purge rsync -yqq
+      apt purge rsync -yqq  >/dev/null 2>&1
   fi
   optfolder="/opt/appdata"
-  if [[ ! -d ${optfolder}/authelia && ! -d ${optfolder}/traefik ]]; then
-     for i in ${optfolder}; do
+  for i in ${optfolder}; do
      mkdir -p $i/{authelia,traefik,compose,portainer} \
               $i/traefik/{rules,acme}
      find $i -exec chown -hR 1000:1000 {} \;
-     done
-  fi
-  if [[ -d ${optfolder}/authelia && -d ${optfolder}/traefik ]]; then
-     for i in ${optfolder}; do
-     mkdir -p $i/{authelia,traefik,compose,portainer} \
-              $i/traefik/{rules,acme}
-     done
-     touch /opt/appdata/traefik/acme/acme.json
-     chmod 600 /opt/appdata/traefik/acme/acme.json
-     touch /opt/appdata/authelia/authelia.log
-     chmod 600 /opt/appdata/authelia/authelia.log
-  fi
-
+  done
+     touch ${optfolder}/traefik/acme/acme.json \
+           ${optfolder}/traefik/traefik.log \
+           ${optfolder}/authelia/authelia.log
+     chmod 600 ${optfolder}/traefik/traefik.log \
+               ${optfolder}/authelia/authelia.log \
+               ${optfolder}/traefik/acme/acme.json
   break
 done
 
@@ -143,7 +144,7 @@ else
    MODIFIED=$(cat /etc/hosts | grep $DOMAIN && echo true || echo false)
    if [[ $MODIFIED == "false" ]]; then
    echo "\
-127.0.0.1  *.$DOMAIN 
+127.0.0.1  *.$DOMAIN
 127.0.0.1  $DOMAIN" >> /etc/hosts
    fi
    if [[ $DOMAIN != "example.com" ]]; then
@@ -164,9 +165,10 @@ displayname() {
 tee <<-EOF
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 Authelia Username 
+🚀 Authelia Username
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
+
   read -ep "Enter your display name for Authelia (eg. John Doe): " DISPLAYNAME
 
 if [[ $DISPLAYNAME != "" ]]; then
@@ -188,21 +190,25 @@ password() {
 tee <<-EOF
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 Authelia Password 
+🚀 Authelia Password
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
+
   read -esp "Enter a password for $USERNAME: " PASSWORD
 
 if [[ $PASSWORD != "" ]]; then
   docker pull authelia/authelia -q > /dev/null
-  PASSWORD=$(docker run authelia/authelia authelia hash-password $PASSWORD | sed 's/Password hash: //g')
+  PASSWORD=$(docker run authelia/authelia authelia hash-password $PASSWORD -i 2 -k 32 -m 128 -p 8 -l 32 | sed 's/Password hash: //g')
   JWTTOKEN=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+  SECTOKEN=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
   if [[ $(uname) == "Darwin" ]]; then
      sed -i '' "s/<PASSWORD>/$(echo $PASSWORD | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/users_database.yml
      sed -i '' "s/JWTTOKENID/$(echo $JWTTOKEN | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
+	 sed -i '' "s/SECTOKEN/unsecure_session_secret| sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
   else
      sed -i "s/<PASSWORD>/$(echo $PASSWORD | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/users_database.yml
      sed -i "s/JWTTOKENID/$(echo $JWTTOKEN | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
+	 sed -i "s/SECTOKEN/unsecure_session_secret| sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
   fi
 else
   echo "Password cannot be empty"
@@ -274,12 +280,17 @@ else
 fi
 }
 
-deploynow() {
-
-serverip
+ccontainer() {
 container=$(docker ps -aq --format '{{.Names}}' | sed '/^$/d' | grep -E 'trae|auth|error-pag')
-docker stop $container >> /dev/null
-docker rm $container >> /dev/null
+if [[ $container != "" ]]; then
+   docker stop $container >> /dev/null
+   docker rm $container >> /dev/null
+fi
+}
+
+deploynow() {
+serverip
+ccontainer
 
 if [[ ! -f "/opt/appdata/authelia/done" ]]; then
    cd /opt/appdata/compose && docker-compose up -d
@@ -302,7 +313,7 @@ tee <<-EOF
 
 Traefikv2 with Authelia is already deployed
 
-Please remove the folder 
+Please remove the folder
 
 before you start again the deploy
 
@@ -347,7 +358,7 @@ EOF
   4) cfemail && interface ;;
   5) cfkey && interface ;;
   d) deploynow && interface ;;
-  D) deploynow && interface ;; 
+  D) deploynow && interface ;;
   z) exit 0 ;;
   Z) exit 0 ;;
   *) interface ;;
