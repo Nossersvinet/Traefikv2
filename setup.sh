@@ -5,7 +5,6 @@
 # URL:        https://sudobox.io/
 # GNU:        General Public License v3.0
 ################################################################################
-
 #FUNCTIONS
 updatesystem() {
 while true; do
@@ -34,8 +33,8 @@ while true; do
   fi
   mntcheck=$(docker volume ls | grep unionfs | head -n1 && echo true || echo false)
   if [[ $mntcheck == "false" ]]; then
-     sudo bash /opt/traefik/templates/local/install.sh  >/dev/null 2>&1
-     sudo docker volume create -d local-persist -o mountpoint=/mnt --name=unionfs >/dev/null 2>&1
+     bash /opt/traefik/templates/local/install.sh >/dev/null 2>&1
+     docker volume create -d local-persist -o mountpoint=/mnt --name=unionfs >/dev/null 2>&1
   fi
   networkcheck=$(docker network ls | grep "proxy" | tail -n 2 && echo true || echo false)
   if [[ $networkcheck == "false" ]]; then
@@ -51,16 +50,16 @@ while true; do
      chmod a=rx,u+w /usr/local/bin/docker-compose >/dev/null 2>&1
      chmod a=rx,u+w /usr/bin/docker-compose >/dev/null 2>&1
   fi
-
   if [[ ! -x "$(command -v fail2ban-client)" ]]; then
      apt install fail2ban -yqq
-     LOCALMOD=$(cat /etc/fail2ban/jail.local && echo true || echo false)
-     MOD=$(cat /etc/fail2ban/jail.local | grep [authelia] && echo true || echo false)
-     if [[ $LOCALMOD == "false" ]]; then
-        cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
-     fi
-     if [[ $MOD == "false" ]]; then
-        echo "\
+  fi
+  LOCALMOD=$(cat /etc/fail2ban/jail.local && echo true || echo false)
+  MOD=$(cat /etc/fail2ban/jail.local | grep [authelia] && echo true || echo false)
+  if [[ $LOCALMOD == "false" ]]; then
+     cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+  fi
+  if [[ $MOD == "false" ]]; then
+     echo "\
 
 [authelia]
 enabled = true
@@ -72,28 +71,26 @@ bantime = 90d
 findtime = 7d
 chain = DOCKER-USER">> /etc/fail2ban/jail.local
 /etc/init.d/fail2ban restart
-      fi
   fi
   optfolder="/opt/appdata"
-
   if [[ ! -d "${optfolder}/authelia" && ! -d "{optfolder}/traefik" ]]; then
      for i in ${optfolder}; do
      mkdir -p $i/{authelia,traefik,compose,portainer} \
               $i/traefik/{rules,acme}
      find $i -exec chown -hR 1000:1000 {} \;
-     if [[ ! -f "/opt/appdata/authelia/configuration.yml" ]]; then
-        cp /opt/traefik/templates/authelia/ /opt/appdata/authelia/
-        cp /opt/traefik/templates/traefik/ /opt/appdata/traefik/
-        cp /opt/traefik/templates/compose/ /opt/appdata/compose/
-     fi
-     done
-     touch /opt/appdata/traefik/acme/acme.json
-     chmod 650 /opt/appdata/traefik/acme/acme.json
-     touch /opt/appdata/authelia/authelia.log
-     chmod 650 /opt/appdata/traefik/authelia/authelia.log
   fi
+  if [[ ! -f "/opt/appdata/authelia/configuration.yml" ]]; then
+     cp /opt/traefik/templates/authelia/ /opt/appdata/authelia/
+     cp /opt/traefik/templates/traefik/ /opt/appdata/traefik/
+     cp /opt/traefik/templates/compose/ /opt/appdata/compose/
+  fi
+  touch /opt/appdata/traefik/acme/acme.json
+  chmod 650 /opt/appdata/traefik/acme/acme.json
+  touch /opt/appdata/authelia/authelia.log
+  chmod 650 /opt/appdata/authelia/authelia.log
   break
 done
+
 interface
 }
 ########## FUNCTIONS START
@@ -106,6 +103,7 @@ tee <<-EOF
 
 EOF
 read -ep "What root domain would you like to protect?: " DOMAIN
+
 if [[ $DOMAIN == "" ]]; then
    echo "Domain cannot be empty"
    domain
@@ -114,19 +112,20 @@ else
    if [[ $MODIFIED == "false" ]]; then
    echo "\
 127.0.0.1  *.$DOMAIN 
-127.0.0.1  $DOMAIN">> /etc/hosts
+127.0.0.1  $DOMAIN" >> /etc/hosts
    fi
    if [[ $DOMAIN != "example.com" ]]; then
       if [[ $(uname) == "Darwin" ]]; then
          sed -i '' "s/example.com/$DOMAIN/g" /opt/appdata/{compose,authelia}/{docker-compose.yml,configuration.yml}
+         sed -i '' "s/example.com/$DOMAIN/g" /opt/appdata/traefik/rules/middlewares.toml
       else
          sed -i "s/example.com/$DOMAIN/g" /opt/appdata/{compose,authelia}/{docker-compose.yml,configuration.yml}
+         sed -i "s/example.com/$DOMAIN/g" /opt/appdata/traefik/rules/middlewares.toml
      fi
    fi
 fi
 interface
 }
-
 displayname(){
 tee <<-EOF
 
@@ -175,7 +174,6 @@ else
 fi
 interface
 }
-
 cfemail() {
 tee <<-EOF
 
@@ -183,7 +181,9 @@ tee <<-EOF
 🚀 Cloudflare Email-Address
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
+
 read -ep "Whats your CloudFlare-Email-Address : " EMAIL
+
 if [[ $EMAIL != "" ]]; then
   if [[ $(uname) == "Darwin" ]]; then
     sed -i '' "s/EMAIL_ID/$EMAIL/g" /opt/appdata/{compose,authelia}/{docker-compose.yml,configuration.yml}
@@ -196,7 +196,6 @@ else
 fi
 interface
 }
-
 cfkey() {
 tee <<-EOF
 
@@ -204,7 +203,9 @@ tee <<-EOF
 🚀 Cloudflare Global-Key
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
+
 read -ep "Whats your CloudFlare-Global-Key: " CFGLOBAL
+
 if [[ $CFGLOBAL != "" ]]; then
   if [[ $(uname) == "Darwin" ]]; then
     sed -i '' "s/CFGLOBAL_ID/$CFGLOBAL/g" /opt/appdata/{compose,authelia}/{docker-compose.yml,configuration.yml}
@@ -217,11 +218,10 @@ else
 fi
 interface
 }
-
 deploynow() {
 
 if [[ ! -f "/opt/appdata/authelia/done" ]]; then
-    cd /opt/appdata/compose && docker-compose up -d
+   cd /opt/appdata/compose && docker-compose up -d
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 Treafikv2 with Authelia
@@ -244,7 +244,7 @@ Traefikv2 with Authelia is already deployed
 
 Please remove the folder 
 
-before you start again the deployed
+before you start again the deploy
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -258,7 +258,7 @@ interface() {
 tee <<-EOF
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 Treafikv2 with Authelia
+🚀 Treafikv2 with Authelia over Cloudflare
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 [1] Domain                            [ $DOMAIN ]
