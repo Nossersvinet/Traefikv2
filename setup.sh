@@ -204,11 +204,11 @@ if [[ $PASSWORD != "" ]]; then
   if [[ $(uname) == "Darwin" ]]; then
      sed -i '' "s/<PASSWORD>/$(echo $PASSWORD | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/users_database.yml
      sed -i '' "s/JWTTOKENID/$(echo $JWTTOKEN | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
-	 sed -i '' "s/SECTOKEN/unsecure_session_secret| sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
+     sed -i '' "s/SECTOKEN/unsecure_session_secret| sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
   else
      sed -i "s/<PASSWORD>/$(echo $PASSWORD | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/users_database.yml
      sed -i "s/JWTTOKENID/$(echo $JWTTOKEN | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
-	 sed -i "s/SECTOKEN/unsecure_session_secret| sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
+     sed -i "s/SECTOKEN/unsecure_session_secret| sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
   fi
 else
   echo "Password cannot be empty"
