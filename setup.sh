@@ -28,8 +28,7 @@ while true; do
           curl \
           wget \
           gnupg-agent \
-          software-properties-common \
-          fail2ban -yqq
+          software-properties-common -yqq
      curl --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
      cp /opt/traefik/templates/local/local/daemon.j2 > /etc/docker/daemon.json
   fi
@@ -87,7 +86,7 @@ chain = DOCKER-USER">> /etc/fail2ban/jail.local
         cp /opt/traefik/templates/traefik/ /opt/appdata/traefik/
         cp /opt/traefik/templates/compose/ /opt/appdata/compose/
      fi
-	 done
+     done
      touch /opt/appdata/traefik/acme/acme.json
      chmod 650 /opt/appdata/traefik/acme/acme.json
      touch /opt/appdata/authelia/authelia.log
@@ -233,8 +232,8 @@ Traefikv2 with Authelia is deployed ; have fun ;-)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-	touch /opt/appdata/authelia/done
-	sleep 5 && interface
+   touch /opt/appdata/authelia/done
+   sleep 5 && interface
 else
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -250,7 +249,7 @@ before you start again the deployed
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-	sleep 5 && interface
+   sleep 5 && interface
 fi
 }
 ######################################################
@@ -281,6 +280,7 @@ EOF
   read -p '↘️  Type Number | Press [ENTER]: ' typed </dev/tty
 
   case $typed in
+
   1) domain && interface ;;
   2) displayname && interface ;;
   3) password && interface ;;
@@ -291,6 +291,7 @@ EOF
   z) exit 0 ;;
   Z) exit 0 ;;
   *) interface ;;
+
   esac
 }
 # FUNCTIONS END ##############################################################
