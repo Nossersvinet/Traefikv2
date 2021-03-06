@@ -85,10 +85,10 @@ chain = DOCKER-USER">> /etc/fail2ban/jail.local
      if [[ ! -f "/opt/appdata/authelia/configuration.yml" ]]; then
         cp /opt/traefik/templates/authelia/ /opt/appdata/authelia/
         cp /opt/traefik/templates/traefik/ /opt/appdata/traefik/
-		cp /opt/traefik/templates/compose/ /opt/appdata/compose/
+        cp /opt/traefik/templates/compose/ /opt/appdata/compose/
      fi
 	 done
-	 touch /opt/appdata/traefik/acme/acme.json
+     touch /opt/appdata/traefik/acme/acme.json
      chmod 650 /opt/appdata/traefik/acme/acme.json
      touch /opt/appdata/authelia/authelia.log
      chmod 650 /opt/appdata/traefik/authelia/authelia.log
