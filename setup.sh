@@ -87,7 +87,7 @@ chain = DOCKER-USER">> /etc/fail2ban/jail.local
   fi
   f2ban=$(systemctl is-active fail2ban | grep "active" && echo true || echo false)
   if [[ $f2ban != "false" ]]; then
-     systemctl reload-or-restart fail2ban.service  >/dev/null 2>&1
+     systemctl reload-or-restart fail2ban.service >/dev/null 2>&1
 	 systemctl enable fail2ban.service >/dev/null 2>&1
   fi
   if [[ ! -x "$(command -v rsync)" ]]; then
@@ -277,6 +277,9 @@ fi
 deploynow() {
 
 serverip
+container=$(docker ps -aq --format '{{.Names}}' | sed '/^$/d' | grep -E 'trae|auth|error-pag')
+docker stop $container >> /dev/null
+docker rm $container >> /dev/null
 
 if [[ ! -f "/opt/appdata/authelia/done" ]]; then
    cd /opt/appdata/compose && docker-compose up -d
