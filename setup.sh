@@ -19,7 +19,6 @@ while true; do
   package_list="update upgrade dist-upgrade autoremove autoclean"
   for i in ${package_list}; do
       apt $i -yqq 1>/dev/null 2>&1
-      sleep 1
   done
   if [[ ! -d "/mnt/downloads" && ! -d "/mnt/unionfs" ]]; then
      basefolder="/mnt"
@@ -45,37 +44,23 @@ while true; do
      curl --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
   fi
   dockertest=$(systemctl is-active docker | grep "active" && echo true || echo false)
-  if [[ $dockertest != "false" ]]; then
-     systemctl reload-or-restart docker.service >/dev/null 2>1
-     systemctl enable docker.service >/dev/null 2>&1
-  fi
+  if [[ $dockertest != "false" ]]; then systemctl reload-or-restart docker.service >/dev/null 2>1 && systemctl enable docker.service >/dev/null 2>&1; fi
   mntcheck=$(docker volume ls | grep unionfs | head -n1 && echo true || echo false)
-  if [[ $mntcheck == "false" ]]; then
-     bash /opt/traefik/templates/local/install.sh >/dev/null 2>&1
-     docker volume create -d local-persist -o mountpoint=/mnt --name=unionfs >/dev/null 2>&1
-  fi
+  if [[ $mntcheck == "false" ]]; then bash /opt/traefik/templates/local/install.sh >/dev/null 2>&1 && docker volume create -d local-persist -o mountpoint=/mnt --name=unionfs >/dev/null 2>&1; fi
   networkcheck=$(docker network ls | grep "proxy" | tail -n 2 && echo true || echo false)
-  if [[ $networkcheck == "false" ]]; then
-     docker network create --driver=bridge proxy
-  fi
+  if [[ $networkcheck == "false" ]]; then docker network create --driver=bridge proxy >/dev/null 2>1; fi
   if [[ ! -x "$(command -v docker-compose)" ]]; then
      COMPOSE_VERSION=$(curl --silent -fsSL https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
      sh -c "curl --silent -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose"
      sh -c "curl --silent -L https://raw.githubusercontent.com/docker/compose/${COMPOSE_VERSION}/contrib/completion/bash/docker-compose > /etc/bash_completion.d/docker-compose"
-     if [[ ! -L "/usr/bin/docker-compose" ]]; then
-        rm -f /usr/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
-     fi
+     if [[ ! -L "/usr/bin/docker-compose" ]]; then rm -f /usr/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose; fi
      chmod a=rx,u+w /usr/local/bin/docker-compose >/dev/null 2>&1
      chmod a=rx,u+w /usr/bin/docker-compose >/dev/null 2>&1
   fi
-  if [[ ! -x "$(command -v fail2ban-client)" ]]; then
-     apt install fail2ban -yqq
-  fi
+  if [[ ! -x "$(command -v fail2ban-client)" ]]; then apt install fail2ban -yqq >/dev/null 2>&1; fi
   LOCALMOD=$(cat /etc/fail2ban/jail.local && echo true || echo false)
   MOD=$(cat /etc/fail2ban/jail.local | grep [authelia] && echo true || echo false)
-  if [[ $LOCALMOD == "false" ]]; then
-     cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
-  fi
+  if [[ $LOCALMOD == "false" ]]; then cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local; fi
   if [[ $MOD == "false" ]]; then
      echo "\
 
@@ -98,29 +83,21 @@ chain = DOCKER-USER">> /etc/fail2ban/jail.local
      systemctl reload-or-restart fail2ban.service >/dev/null 2>&1
      systemctl enable fail2ban.service >/dev/null 2>&1
   fi
-  if [[ ! -x "$(command -v rsync)" ]]; then
-      apt install rsync -yqq >/dev/null 2>&1
-  fi
-  if [[ ! -f "/opt/appdata/authelia/configuration.yml" && ! -f "/opt/appdata/traefik/rules/middlewares.toml" ]]; then
+  if [[ ! -x "$(command -v rsync)" ]]; then apt install rsync -yqq >/dev/null 2>&1; fi
      rsync /opt/traefik/templates/ /opt/appdata/ -aq --info=progress2 -hv --exclude local
-  else
-     rsync /opt/traefik/templates/ /opt/appdata/ -aq --info=progress2 -hv --exclude local
-  fi
-  if [[ -x "$(command -v rsync)" ]]; then
-      apt purge rsync -yqq  >/dev/null 2>&1
-  fi
+  if [[ -x "$(command -v rsync)" ]]; then  apt purge rsync -yqq  >/dev/null 2>&1; fi
   optfolder="/opt/appdata"
   for i in ${optfolder}; do
      mkdir -p $i/{authelia,traefik,compose,portainer} \
               $i/traefik/{rules,acme}
-     find $i -exec chown -hR 1000:1000 {} \;
+     find $i/{authelia,traefik,compose,portainer} -exec chown -hR 1000:1000 {} \;
   done
-     touch ${optfolder}/traefik/acme/acme.json \
-           ${optfolder}/traefik/traefik.log \
-           ${optfolder}/authelia/authelia.log
-     chmod 600 ${optfolder}/traefik/traefik.log \
-               ${optfolder}/authelia/authelia.log \
-               ${optfolder}/traefik/acme/acme.json
+  touch ${optfolder}/traefik/acme/acme.json \
+        ${optfolder}/traefik/traefik.log \
+        ${optfolder}/authelia/authelia.log
+  chmod 600 ${optfolder}/traefik/traefik.log \
+            ${optfolder}/authelia/authelia.log \
+            ${optfolder}/traefik/acme/acme.json
   break
 done
 
@@ -135,7 +112,7 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-read -ep "What root domain would you like to protect?: " DOMAIN
+   read -ep "What root domain would you like to protect?: " DOMAIN
 
 if [[ $DOMAIN == "" ]]; then
    echo "Domain cannot be empty"
@@ -167,9 +144,9 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 Authelia Username
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-EOF
 
-  read -ep "Enter your display name for Authelia (eg. John Doe): " DISPLAYNAME
+EOF
+   read -ep "Enter your display name for Authelia (eg. John Doe): " DISPLAYNAME
 
 if [[ $DISPLAYNAME != "" ]]; then
   if [[ $(uname) == "Darwin" ]]; then
@@ -192,9 +169,9 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 Authelia Password
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-EOF
 
-  read -esp "Enter a password for $USERNAME: " PASSWORD
+EOF
+   read -esp "Enter a password for $USERNAME: " PASSWORD
 
 if [[ $PASSWORD != "" ]]; then
   docker pull authelia/authelia -q > /dev/null
@@ -222,9 +199,9 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 Cloudflare Email-Address
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-EOF
 
-read -ep "Whats your CloudFlare-Email-Address : " EMAIL
+EOF
+   read -ep "Whats your CloudFlare-Email-Address : " EMAIL
 
 if [[ $EMAIL != "" ]]; then
   if [[ $(uname) == "Darwin" ]]; then
@@ -246,9 +223,9 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 Cloudflare Global-Key
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-EOF
 
-read -ep "Whats your CloudFlare-Global-Key: " CFGLOBAL
+EOF
+   read -ep "Whats your CloudFlare-Global-Key: " CFGLOBAL
 
 if [[ $CFGLOBAL != "" ]]; then
   if [[ $(uname) == "Darwin" ]]; then
@@ -290,41 +267,31 @@ fi
 deploynow() {
 serverip
 ccontainer
-
-if [[ ! -f "/opt/appdata/authelia/done" ]]; then
-   cd /opt/appdata/compose && docker-compose up -d
+cd /opt/appdata/compose && docker-compose up -d && sleep 5
+container=$(docker ps -aq --format '{{.Names}}' | sed '/^$/d' | grep -E 'trae|auth|error-pag' | wc -l)
+if [[ $container == "3" ]]; then
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 Treafikv2 with Authelia
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Traefikv2 with Authelia is deployed ; have fun ;-)
+       Traefikv2 with Authelia is deployed
+
+   Please Wait some minutes Authelia and Treafik 
+     need some minutes to start all services
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-   sleep 5 && interface
 else
-tee <<-EOF
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 ERROR Treafikv2 with Authelia
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Traefikv2 with Authelia is already deployed
-
-Please remove the folder
-
-before you start again the deploy
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-EOF
-   sleep 5 && interface
+   ## failsafe for rebuild
+   deploynow
+fi
+interface
 fi
 }
 ######################################################
 interface() {
-
 tee <<-EOF
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -346,11 +313,8 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-
   read -p '↘️  Type Number | Press [ENTER]: ' typed </dev/tty
-
   case $typed in
-
   1) domain && interface ;;
   2) displayname && interface ;;
   3) password && interface ;;
@@ -361,7 +325,6 @@ EOF
   z) exit 0 ;;
   Z) exit 0 ;;
   *) interface ;;
-
   esac
 }
 # FUNCTIONS END ##############################################################
