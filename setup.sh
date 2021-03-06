@@ -8,6 +8,12 @@
 #FUNCTIONS
 updatesystem() {
 while true; do
+  package_list="update upgrade dist-upgrade autoremove autoclean"
+  for i in ${package_list}; do
+      sudo apt $i -yqq 1>/dev/null 2>&1
+      echo "$i is running , please wait"
+      sleep 1
+  done
   if [[ ! -d "/mnt/downloads" && ! -d "/mnt/unionfs" ]]; then
      basefolder="/mnt"
      for i in ${basefolder}; do
@@ -29,7 +35,15 @@ while true; do
           gnupg-agent \
           software-properties-common -yqq
      curl --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
-     cp /opt/traefik/templates/local/daemon.j2 > /etc/docker/daemon.json
+     cp /opt/traefik/templates/local/daemon.j2 /etc/docker/daemon.json
+   else
+     cp /opt/traefik/templates/local/daemon.j2 /etc/docker/daemon.json
+     curl --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
+  fi
+  dockertest=$(systemctl is-active docker | grep "active" && echo true || echo false)
+  if [[ $dockertest != "false" ]]; then
+     systemctl reload-or-restart docker.service >/dev/null 2>1
+	 systemctl enable docker.service >/dev/null 2>&1
   fi
   mntcheck=$(docker volume ls | grep unionfs | head -n1 && echo true || echo false)
   if [[ $mntcheck == "false" ]]; then
@@ -70,24 +84,42 @@ maxretry = 2
 bantime = 90d
 findtime = 7d
 chain = DOCKER-USER">> /etc/fail2ban/jail.local
-/etc/init.d/fail2ban restart
+  fi
+  f2ban=$(systemctl is-active fail2ban | grep "active" && echo true || echo false)
+  if [[ $f2ban != "false" ]]; then
+     systemctl reload-or-restart fail2ban.service  >/dev/null 2>&1
+	 systemctl enable fail2ban.service >/dev/null 2>&1
+  fi
+  if [[ ! -x "$(command -v rsync)" ]]; then
+      apt-get install rsync -yqq
+  fi
+  if [[ ! -f "/opt/appdata/authelia/configuration.yml" && ! -f "/opt/appdata/traefik/rules/middlewares.toml" ]]; then
+     rsync /opt/traefik/templates/ /opt/appdata/ -aq --info=progress2 -hv --exclude local
+  else
+     rsync /opt/traefik/templates/ /opt/appdata/ -aq --info=progress2 -hv --exclude local
+  fi
+  if [[ -x "$(command -v rsync)" ]]; then
+      apt-get purge rsync -yqq
   fi
   optfolder="/opt/appdata"
-  if [[ ! -d "${optfolder}/authelia" && ! -d "{optfolder}/traefik" ]]; then
+  if [[ ! -d ${optfolder}/authelia && ! -d ${optfolder}/traefik ]]; then
      for i in ${optfolder}; do
      mkdir -p $i/{authelia,traefik,compose,portainer} \
               $i/traefik/{rules,acme}
      find $i -exec chown -hR 1000:1000 {} \;
+     done
   fi
-  if [[ ! -f "/opt/appdata/authelia/configuration.yml" ]]; then
-     cp /opt/traefik/templates/authelia/ /opt/appdata/authelia/
-     cp /opt/traefik/templates/traefik/ /opt/appdata/traefik/
-     cp /opt/traefik/templates/compose/ /opt/appdata/compose/
+  if [[ -d ${optfolder}/authelia && -d ${optfolder}/traefik ]]; then
+     for i in ${optfolder}; do
+     mkdir -p $i/{authelia,traefik,compose,portainer} \
+              $i/traefik/{rules,acme}
+     done
+     touch /opt/appdata/traefik/acme/acme.json
+     chmod 600 /opt/appdata/traefik/acme/acme.json
+     touch /opt/appdata/authelia/authelia.log
+     chmod 600 /opt/appdata/authelia/authelia.log
   fi
-  touch /opt/appdata/traefik/acme/acme.json
-  chmod 650 /opt/appdata/traefik/acme/acme.json
-  touch /opt/appdata/authelia/authelia.log
-  chmod 650 /opt/appdata/authelia/authelia.log
+
   break
 done
 
@@ -116,10 +148,12 @@ else
    fi
    if [[ $DOMAIN != "example.com" ]]; then
       if [[ $(uname) == "Darwin" ]]; then
-         sed -i '' "s/example.com/$DOMAIN/g" /opt/appdata/{compose,authelia}/{docker-compose.yml,configuration.yml}
+         sed -i '' "s/example.com/$DOMAIN/g" /opt/appdata/authelia/configuration.yml
+         sed -i '' "s/example.com/$DOMAIN/g" /opt/appdata/compose/docker-compose.yml
          sed -i '' "s/example.com/$DOMAIN/g" /opt/appdata/traefik/rules/middlewares.toml
       else
-         sed -i "s/example.com/$DOMAIN/g" /opt/appdata/{compose,authelia}/{docker-compose.yml,configuration.yml}
+         sed -i "s/example.com/$DOMAIN/g" /opt/appdata/authelia/configuration.yml
+         sed -i "s/example.com/$DOMAIN/g" /opt/appdata/compose/docker-compose.yml
          sed -i "s/example.com/$DOMAIN/g" /opt/appdata/traefik/rules/middlewares.toml
      fi
    fi
@@ -138,8 +172,10 @@ EOF
 if [[ $DISPLAYNAME != "" ]]; then
   if [[ $(uname) == "Darwin" ]]; then
     sed -i '' "s/<DISPLAYNAME>/$DISPLAYNAME/g" /opt/appdata/authelia/users_database.yml
+    sed -i '' "s/<USERNAME>/$DISPLAYNAME/g" /opt/appdata/authelia/users_database.yml
   else
     sed -i "s/<DISPLAYNAME>/$DISPLAYNAME/g" /opt/appdata/authelia/users_database.yml
+    sed -i "s/<USERNAME>/$DISPLAYNAME/g" /opt/appdata/authelia/users_database.yml
   fi
 else
   echo "Display name cannot be empty"
@@ -186,9 +222,12 @@ read -ep "Whats your CloudFlare-Email-Address : " EMAIL
 
 if [[ $EMAIL != "" ]]; then
   if [[ $(uname) == "Darwin" ]]; then
-    sed -i '' "s/EMAIL_ID/$EMAIL/g" /opt/appdata/{compose,authelia}/{docker-compose.yml,configuration.yml}
+    sed -i '' "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/authelia/configuration.yml
+    sed -i '' "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/compose/docker-compose.yml
+
   else
-    sed -i "s/EMAIL_ID/$EMAIL/g" /opt/appdata/{compose,authelia}/{docker-compose.yml,configuration.yml}
+    sed -i "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/authelia/configuration.yml
+    sed -i "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/compose/docker-compose.yml
   fi
 else
   echo "CloudFlare-Email-Address cannot be empty"
@@ -208,9 +247,11 @@ read -ep "Whats your CloudFlare-Global-Key: " CFGLOBAL
 
 if [[ $CFGLOBAL != "" ]]; then
   if [[ $(uname) == "Darwin" ]]; then
-    sed -i '' "s/CFGLOBAL_ID/$CFGLOBAL/g" /opt/appdata/{compose,authelia}/{docker-compose.yml,configuration.yml}
+    sed -i '' "s/example-CF-API-KEY/$CFGLOBAL/g" /opt/appdata/authelia/configuration.yml
+    sed -i '' "s/example-CF-API-KEY/$CFGLOBAL/g" /opt/appdata/compose/docker-compose.yml
   else
-    sed -i "s/CFGLOBAL_ID/$CFGLOBAL/g" /opt/appdata/{compose,authelia}/{docker-compose.yml,configuration.yml}
+    sed -i "s/example-CF-API-KEY/$CFGLOBAL/g" /opt/appdata/authelia/configuration.yml
+    sed -i "s/example-CF-API-KEY/$CFGLOBAL/g" /opt/appdata/compose/docker-compose.yml
   fi
 else
   echo "CloudFlare-Global-Key cannot be empty"
@@ -218,7 +259,24 @@ else
 fi
 interface
 }
+
+serverip() {
+SERVERIP=$(ip addr show |grep 'inet '|grep -v 127.0.0.1 |awk '{print $2}'| cut -d/ -f1 | head -n1)
+if [[ $SERVERIP != "" ]]; then
+  if [[ $(uname) == "Darwin" ]]; then
+    sed -i '' "s/SERVERIP_ID/$SERVERIP/g" /opt/appdata/authelia/configuration.yml
+  else
+    sed -i "s/SERVERIP_ID/$SERVERIP/g" /opt/appdata/authelia/configuration.yml
+  fi
+else
+  echo "Server-IP cannot be empty"
+  serverip
+fi
+}
+
 deploynow() {
+
+serverip
 
 if [[ ! -f "/opt/appdata/authelia/done" ]]; then
    cd /opt/appdata/compose && docker-compose up -d
@@ -232,7 +290,6 @@ Traefikv2 with Authelia is deployed ; have fun ;-)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-   touch /opt/appdata/authelia/done
    sleep 5 && interface
 else
 tee <<-EOF
@@ -264,7 +321,7 @@ tee <<-EOF
 [1] Domain                            [ $DOMAIN ]
 [2] Authelia Username                 [ $DISPLAYNAME ]
 [3] Authelia Password                 [ $PASSWORD ]
-[4] CloudFlare-Email-Address          [ $EMAIL_ID ]
+[4] CloudFlare-Email-Address          [ $EMAIL ]
 [5] CloudFlare-Global-Key             [ $CFGLOBAL ]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -44,7 +44,7 @@ services:
       - --providers.file.watch=true
       ## cloudflare certs
       - --certificatesResolvers.dns-cloudflare.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
-      - --certificatesResolvers.dns-cloudflare.acme.email=CF_EMAIL
+      - --certificatesResolvers.dns-cloudflare.acme.email=example-CF-EMAIL
       - --certificatesResolvers.dns-cloudflare.acme.storage=/acme.json
       - --certificatesResolvers.dns-cloudflare.acme.dnsChallenge.provider=cloudflare
       - --certificatesResolvers.dns-cloudflare.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53
@@ -63,8 +63,8 @@ services:
       - '/opt/appdata/traefik/acme/acme.json:/acme.json'
       - '/opt/appdata/traefik/traefik.log:/traefik.log'
     environment:
-      - CLOUDFLARE_EMAIL=CF_EMAIL
-      - CLOUDFLARE_API_KEY=CF_GLOBAL_KEY
+      - CLOUDFLARE_EMAIL=example-CF-EMAIL
+      - CLOUDFLARE_API_KEY=example-CF-API-KEY
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.routers.http-catchall.entrypoints=http'
