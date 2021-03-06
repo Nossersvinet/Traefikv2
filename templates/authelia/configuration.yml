@@ -1,0 +1,67 @@
+###############################################################
+#                   Authelia configuration                    #
+###############################################################
+
+host: 0.0.0.0
+port: 9091
+theme: dark
+log_level: debug
+jwt_secret: JWTOKEN
+default_redirection_url: https://authelia.example.com
+totp:
+  issuer: authelia.com
+
+authentication_backend:
+  file:
+    path: /config/users_database.yml
+    password:
+      algorithm: argon2id
+      iterations: 1
+      salt_length: 16
+      parallelism: 8
+      memory: 1024
+
+access_control:
+  default_policy: deny
+  rules:
+    # Rules applied to everyone
+    - domain: overseerr.example.com
+      policy: bypass
+    - domain: authelia.example.com
+      policy: bypass
+    - domain: "*.example.com"
+      policy: bypass
+      resources:
+        - "^/api.*$"
+        - "^/identity.*$"
+    - domain: "*.example.com"
+      policy: one_factor
+    - domain: "example.com"
+      policy: deny
+    - domain: SERVERIP_ID
+      policy: deny
+
+session:
+  name: authelia_session
+  secret: unsecure_session_secret
+  expiration: 1h
+  inactivity: 5m
+  remember_me_duration: 1M  
+  domain: example.com
+
+regulation:
+  max_retries: 3
+  find_time: 120
+  ban_time: 300
+
+storage:
+  local:
+    path: /config/db.sqlite3
+
+notifier:
+  filesystem:
+    filename: /config/notification.txt
+
+###############################################################
+#                   Authelia configuration                    #
+###############################################################
