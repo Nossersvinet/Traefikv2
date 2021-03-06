@@ -29,7 +29,7 @@ while true; do
           gnupg-agent \
           software-properties-common -yqq
      curl --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
-     cp /opt/traefik/templates/local/local/daemon.j2 > /etc/docker/daemon.json
+     cp /opt/traefik/templates/local/daemon.j2 > /etc/docker/daemon.json
   fi
   mntcheck=$(docker volume ls | grep unionfs | head -n1 && echo true || echo false)
   if [[ $mntcheck == "false" ]]; then
