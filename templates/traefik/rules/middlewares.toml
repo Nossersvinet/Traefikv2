@@ -6,7 +6,7 @@
 
   [http.middlewares.middlewares-secure-headers]
     [http.middlewares.middlewares-secure-headers.headers]
-      accessControlAllowMethods= ["GET", "OPTIONS", "PUT"]
+      accessControlAllowMethods= ["GET", "OPTIONS", "PUT", "POST"]
       accessControlMaxAge = 100
       hostsProxyHeaders = ["X-Forwarded-Host"]
       sslRedirect = true
