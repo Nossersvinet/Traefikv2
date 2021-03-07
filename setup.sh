@@ -24,7 +24,7 @@ while true; do
      basefolder="/mnt"
      for i in ${basefolder}; do
          mkdir -p $i/{unionfs,downloads,incomplete,torrent,nzb} \
-                  $i/{incomplete,downloads}/{nzb,torrent}/{movies,tv,tv4k,movies4k,remux} \
+                  $i/{incomplete,downloads}/{nzb,torrent}/{movies,tv,tv4k,movies4k,movieshdr,tvhdr,remux} \
                   $i/{torrent,nzb}/watch
         find $i -exec chmod a=rx,u+w {} \;
         find $i -exec chown -hR 1000:1000 {} \;
