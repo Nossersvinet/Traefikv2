@@ -28,7 +28,7 @@ while true; do
                   $i/{torrent,nzb}/watch
         find $i -exec chmod a=rx,u+w {} \;
         find $i -exec chown -hR 1000:1000 {} \;
-    done
+     done
   fi
   if [[ ! -x "$(command -v docker)"  ]]; then
      package_list="update apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common"
@@ -38,7 +38,7 @@ while true; do
      done
      curl --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
      cp /opt/traefik/templates/local/daemon.j2 /etc/docker/daemon.json
-   else
+  else
      cp /opt/traefik/templates/local/daemon.j2 /etc/docker/daemon.json
      curl --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
   fi
@@ -87,9 +87,9 @@ chain = DOCKER-USER">> /etc/fail2ban/jail.local
   if [[ -x "$(command -v rsync)" ]]; then  apt purge rsync -yqq  >/dev/null 2>&1; fi
   optfolder="/opt/appdata"
   for i in ${optfolder}; do
-     mkdir -p $i/{authelia,traefik,compose,portainer} \
-              $i/traefik/{rules,acme}
-     find $i/{authelia,traefik,compose,portainer} -exec chown -hR 1000:1000 {} \;
+      mkdir -p $i/{authelia,traefik,compose,portainer} \
+               $i/traefik/{rules,acme}
+      find $i/{authelia,traefik,compose,portainer} -exec chown -hR 1000:1000 {} \;
   done
   touch ${optfolder}/traefik/acme/acme.json \
         ${optfolder}/traefik/traefik.log \
@@ -147,13 +147,13 @@ EOF
    read -ep "Enter your display name for Authelia (eg. John Doe): " DISPLAYNAME
 
 if [[ $DISPLAYNAME != "" ]]; then
-  if [[ $(uname) == "Darwin" ]]; then
-    sed -i '' "s/<DISPLAYNAME>/$DISPLAYNAME/g" /opt/appdata/authelia/users_database.yml
-    sed -i '' "s/<USERNAME>/$DISPLAYNAME/g" /opt/appdata/authelia/users_database.yml
-  else
-    sed -i "s/<DISPLAYNAME>/$DISPLAYNAME/g" /opt/appdata/authelia/users_database.yml
-    sed -i "s/<USERNAME>/$DISPLAYNAME/g" /opt/appdata/authelia/users_database.yml
-  fi
+   if [[ $(uname) == "Darwin" ]]; then
+      sed -i '' "s/<DISPLAYNAME>/$DISPLAYNAME/g" /opt/appdata/authelia/users_database.yml
+      sed -i '' "s/<USERNAME>/$DISPLAYNAME/g" /opt/appdata/authelia/users_database.yml
+   else
+      sed -i "s/<DISPLAYNAME>/$DISPLAYNAME/g" /opt/appdata/authelia/users_database.yml
+      sed -i "s/<USERNAME>/$DISPLAYNAME/g" /opt/appdata/authelia/users_database.yml
+   fi
 else
   echo "Display name cannot be empty"
   displayname
@@ -172,19 +172,19 @@ EOF
    read -esp "Enter a password for $USERNAME: " PASSWORD
 
 if [[ $PASSWORD != "" ]]; then
-  docker pull authelia/authelia -q > /dev/null
-  PASSWORD=$(docker run authelia/authelia authelia hash-password $PASSWORD -i 2 -k 32 -m 128 -p 8 -l 32 | sed 's/Password hash: //g')
-  JWTTOKEN=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-  SECTOKEN=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-  if [[ $(uname) == "Darwin" ]]; then
-     sed -i '' "s/<PASSWORD>/$(echo $PASSWORD | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/users_database.yml
-     sed -i '' "s/JWTTOKENID/$(echo $JWTTOKEN | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
-     sed -i '' "s/SECTOKEN/unsecure_session_secret  | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
-  else
-     sed -i "s/<PASSWORD>/$(echo $PASSWORD | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/users_database.yml
-     sed -i "s/JWTTOKENID/$(echo $JWTTOKEN | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
-     sed -i "s/SECTOKEN/unsecure_session_secret | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
-  fi
+   docker pull authelia/authelia -q > /dev/null
+   PASSWORD=$(docker run authelia/authelia authelia hash-password $PASSWORD -i 2 -k 32 -m 128 -p 8 -l 32 | sed 's/Password hash: //g')
+   JWTTOKEN=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+   SECTOKEN=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+   if [[ $(uname) == "Darwin" ]]; then
+      sed -i '' "s/<PASSWORD>/$(echo $PASSWORD | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/users_database.yml
+      sed -i '' "s/JWTTOKENID/$(echo $JWTTOKEN | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
+      sed -i '' "s/SECTOKEN/unsecure_session_secret  | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
+   else
+      sed -i "s/<PASSWORD>/$(echo $PASSWORD | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/users_database.yml
+      sed -i "s/JWTTOKENID/$(echo $JWTTOKEN | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
+      sed -i "s/SECTOKEN/unsecure_session_secret | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
+   fi
 else
   echo "Password cannot be empty"
   password
@@ -202,15 +202,15 @@ EOF
    read -ep "Whats your CloudFlare-Email-Address : " EMAIL
 
 if [[ $EMAIL != "" ]]; then
-  if [[ $(uname) == "Darwin" ]]; then
-    sed -i '' "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/authelia/configuration.yml
-    sed -i '' "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/authelia/users_database.yml
-    sed -i '' "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/compose/docker-compose.yml
-  else
-    sed -i "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/authelia/configuration.yml
-    sed -i "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/authelia/users_database.yml
-    sed -i "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/compose/docker-compose.yml
-  fi
+   if [[ $(uname) == "Darwin" ]]; then
+      sed -i '' "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/authelia/configuration.yml
+      sed -i '' "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/authelia/users_database.yml
+      sed -i '' "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/compose/docker-compose.yml
+   else
+      sed -i "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/authelia/configuration.yml
+      sed -i "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/authelia/users_database.yml
+      sed -i "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/compose/docker-compose.yml
+   fi
 else
   echo "CloudFlare-Email-Address cannot be empty"
   cfemail
@@ -228,13 +228,13 @@ EOF
    read -ep "Whats your CloudFlare-Global-Key: " CFGLOBAL
 
 if [[ $CFGLOBAL != "" ]]; then
-  if [[ $(uname) == "Darwin" ]]; then
-    sed -i '' "s/example-CF-API-KEY/$CFGLOBAL/g" /opt/appdata/authelia/configuration.yml
-    sed -i '' "s/example-CF-API-KEY/$CFGLOBAL/g" /opt/appdata/compose/docker-compose.yml
-  else
-    sed -i "s/example-CF-API-KEY/$CFGLOBAL/g" /opt/appdata/authelia/configuration.yml
-    sed -i "s/example-CF-API-KEY/$CFGLOBAL/g" /opt/appdata/compose/docker-compose.yml
-  fi
+   if [[ $(uname) == "Darwin" ]]; then
+      sed -i '' "s/example-CF-API-KEY/$CFGLOBAL/g" /opt/appdata/authelia/configuration.yml
+      sed -i '' "s/example-CF-API-KEY/$CFGLOBAL/g" /opt/appdata/compose/docker-compose.yml
+   else
+      sed -i "s/example-CF-API-KEY/$CFGLOBAL/g" /opt/appdata/authelia/configuration.yml
+      sed -i "s/example-CF-API-KEY/$CFGLOBAL/g" /opt/appdata/compose/docker-compose.yml
+   fi
 else
   echo "CloudFlare-Global-Key cannot be empty"
   cfkey
@@ -263,11 +263,11 @@ fi
 serverip() {
 SERVERIP=$(ip addr show |grep 'inet '|grep -v 127.0.0.1 |awk '{print $2}'| cut -d/ -f1 | head -n1)
 if [[ $SERVERIP != "" ]]; then
-  if [[ $(uname) == "Darwin" ]]; then
-    sed -i '' "s/SERVERIP_ID/$SERVERIP/g" /opt/appdata/authelia/configuration.yml
-  else
-    sed -i "s/SERVERIP_ID/$SERVERIP/g" /opt/appdata/authelia/configuration.yml
-  fi
+   if [[ $(uname) == "Darwin" ]]; then
+      sed -i '' "s/SERVERIP_ID/$SERVERIP/g" /opt/appdata/authelia/configuration.yml
+   else
+      sed -i "s/SERVERIP_ID/$SERVERIP/g" /opt/appdata/authelia/configuration.yml
+   fi
 else
   echo "Server-IP cannot be empty"
   serverip
