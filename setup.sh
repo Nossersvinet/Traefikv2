@@ -287,7 +287,7 @@ else
    deploynow
 fi
 interface
-fi
+
 }
 ######################################################
 interface() {
