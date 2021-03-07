@@ -243,6 +243,24 @@ fi
 interface
 }
 
+jounanctlpatch() {
+CTPATCH=$(cat /etc/systemd/journald.conf | grep "#PATCH" && echo true || echo false)
+  if [[ $CTPATCH == "false" ]]; then
+     journalctl --flush 1>/dev/null 2>&1
+     journalctl --rotate 1>/dev/null 2>&1
+     journalctl --vacuum-time=1s 1>/dev/null 2>&1
+     find /var/log -name "*.gz" -delete 1>/dev/null 2>&1
+   echo "\
+
+#PATCH
+Storage=volatile
+Compress=yes
+SystemMaxUse=100M
+SystemMaxFileSize=10M
+SystemMaxFiles=10
+MaxLevelStore=crit" >>/etc/systemd/journald.conf
+fi
+}
 serverip() {
 SERVERIP=$(ip addr show |grep 'inet '|grep -v 127.0.0.1 |awk '{print $2}'| cut -d/ -f1 | head -n1)
 if [[ $SERVERIP != "" ]]; then
@@ -260,18 +278,28 @@ fi
 ccontainer() {
 container=$(docker ps -aq --format '{{.Names}}' | sed '/^$/d' | grep -E 'trae|auth|error-pag')
 if [[ $container != "" ]]; then
-   docker stop $container >> /dev/null
-   docker rm $container >> /dev/null
+   docker stop $container 1>/dev/null 2>&1
+   docker rm $container 1>/dev/null 2>&1
+   docker image prune -af 1>/dev/null 2>&1
+else
+   docker image prune -af 1>/dev/null 2>&1
 fi
 }
 
 deploynow() {
+jounanctlpatch
 serverip
 ccontainer
-cd /opt/appdata/compose && docker-compose up -d && sleep 5
-container=$(docker ps -aq --format '{{.Names}}' | sed '/^$/d' | grep -E 'trae|auth|error-pag' | wc -l)
-if [[ $container == "3" ]]; then
+cd /opt/appdata/compose && docker-compose up -d 1>/dev/null 2>&1 && sleep 5
+while true; do
+  container="authelia traefik traefik-error-pages"
+  for i in ${container}; do
+      if [[ "$(docker container inspect -f '{{.State.Status}}' $i )" == "running" ]]; then echo " --> Container $i is up and running <--" && sleep 2; fi
+  done
+break
+done
 tee <<-EOF
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 Treafikv2 with Authelia
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -284,12 +312,15 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-else
-   ## failsafe for rebuild
-   deploynow
-fi
+sleep 30
+while true; do
+  container="authelia traefik traefik-error-pages"
+  for i in ${container}; do
+      if [[ "$(docker container inspect -f '{{.State.Status}}' $i )" != "running" ]]; then deploynow && sleep 2; fi
+  done
+break
+done
 interface
-
 }
 ######################################################
 interface() {
