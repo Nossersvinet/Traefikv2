@@ -205,9 +205,11 @@ EOF
 if [[ $EMAIL != "" ]]; then
   if [[ $(uname) == "Darwin" ]]; then
     sed -i '' "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/authelia/configuration.yml
+    sed -i '' "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/authelia/users_database.yml
     sed -i '' "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/compose/docker-compose.yml
   else
     sed -i "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/authelia/configuration.yml
+    sed -i "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/authelia/users_database.yml
     sed -i "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/compose/docker-compose.yml
   fi
 else

@@ -5,7 +5,7 @@ users:
   <USERNAME>:
     displayname: "<DISPLAYNAME>"
     password: "<PASSWORD>"
-    email: <USERNAME>@example.com
+    email: example-CF-EMAIL
     groups:
       - admins
       - dev
