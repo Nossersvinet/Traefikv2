@@ -284,7 +284,7 @@ fi
 }
 
 settime() {
-TZTEST=$(command -v timedatectl && echo true || false)
+TZTEST=$(command -v timedatectl && echo true || echo false)
 TZONE=$(timedatectl | grep "Time zone:" | awk '{print $3}')
 if [[ $TZTEST != "false" ]]; then 
    if [[ $TZONE != "" ]]; then
