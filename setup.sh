@@ -285,10 +285,29 @@ else
 fi
 }
 
+settime() {
+TZTEST=$(command -v timedatectl && echo true || false)
+TZONE=$(timedatectl | grep "Time zone:" | awk '{print $3}')
+if [[ $TZTEST != "false" ]]; then 
+   if [[ $TZONE != "" ]]; then
+      if [[ $(uname) == "Darwin" ]]; then
+         sed -i '' "s/UTC/$TZONE/g" /opt/appdata/compose/docker-compose.yml
+      else
+         sed -i "s/UTC/$TZONE/g" /opt/appdata/compose/docker-compose.yml
+      fi
+   fi
+else
+  echo "timedatectl cannot be found, using default Timezone : UTC"
+fi
+}
+
 deploynow() {
+
 jounanctlpatch
 serverip
+settime
 ccontainer
+
 cd /opt/appdata/compose && docker-compose up -d 1>/dev/null 2>&1 && sleep 5
 while true; do
   container="authelia traefik traefik-error-pages"
