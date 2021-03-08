@@ -306,7 +306,7 @@ serverip
 settime
 ccontainer
 
-cd /opt/appdata/compose && docker-compose up -d 1>/dev/null 2>&1 && sleep 5
+cd /opt/appdata/compose && docker-compose up -d --force-recreate 1>/dev/null 2>&1 && sleep 5
 while true; do
   container="authelia traefik traefik-error-pages"
   for i in ${container}; do
