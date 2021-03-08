@@ -62,6 +62,9 @@ services:
       - '/opt/appdata/traefik/acme/acme.json:/acme.json'
       - '/opt/appdata/traefik/traefik.log:/traefik.log'
     environment:
+      - 'PGID=1000'
+      - 'PUID=1000'
+      - TZ=UTC
       - CLOUDFLARE_EMAIL=example-CF-EMAIL
       - CLOUDFLARE_API_KEY=example-CF-API-KEY
     labels:
@@ -81,6 +84,10 @@ services:
     restart: unless-stopped
     networks:
       - proxy
+    environment:
+      - 'PGID=1000'
+      - 'PUID=1000'
+      - TZ=UTC
     labels:
       - 'traefik.enable=true'
       - 'traefik.docker.network=proxy'
@@ -107,6 +114,8 @@ services:
     volumes:
       - '/opt/appdata/authelia:/config'
     environment:
+      - 'PGID=1000'
+      - 'PUID=1000'
       - TZ=UTC
     labels:
       - 'traefik.enable=true'
@@ -132,6 +141,8 @@ services:
       - '/var/run/docker.sock:/var/run/docker.sock:ro'
       - '/opt/appdata/portainer:/data'
     environment:
+      - 'PGID=1000'
+      - 'PUID=1000'
       - TZ=UTC
     labels:
       - 'traefik.enable=true'
