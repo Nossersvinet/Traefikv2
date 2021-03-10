@@ -14,11 +14,11 @@ TLSPCI=$(command -v lshw)
 while true; do
   if [[ -x "$TLSPCI" ]]; then
      echo "lshw found"
-     if [[ $IGPU == "true" && $NGPU == "false" ]]; then
+     if [[ "$IGPU" == "true" && $NGPU == "false" ]]; then
         echo "IGPU" && break
-     elif [[ $IGPU == "true" && $NGPU == "true" ]]; then
+     elif [[ "$IGPU" == "true" && "$NGPU" == "true" ]]; then
         echo "IGPU & NVIDIA GPU" && break
-     elif [[ $IGPU == "false" && $NGPU == "true" ]]; then
+     elif [[ "$IGPU" == "false" && "$NGPU" == "true" ]]; then
         echo "NVIDIA GPU" && break
      else
         echo "nothing found " && break
