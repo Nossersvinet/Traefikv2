@@ -21,7 +21,7 @@ while true; do
      elif [[ $IGPU == "false" && $NGPU == "true" ]]; then
         echo "NVIDIA GPU" && break
      else
-        echo "nothing found "
+        echo "nothing found " && break
      fi
   else
      echo "lshw not found" && break
