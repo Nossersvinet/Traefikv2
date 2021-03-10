@@ -7,13 +7,24 @@
 ################################################################################
 #FUNCTIONS
 
-IGPU=$(lspci  -v -s  $(lspci | grep ' VGA ' | cut -d" " -f 1) | grep -E "i915" | tail -n1 && echo true || echo false)
-NGPU=$(lspci  -v -s  $(lspci | grep ' VGA ' | cut -d" " -f 1) | grep -E "nvidia" | tail -n1 && echo true || echo false)
-TLSPCI=$(command -v lspci && echo true || echo false)
+IGPU=$(lspci -v -s $(lspci | grep ' VGA ' | cut -d" " -f 1) | grep -E 'i915' | awk '{print $5}')
+NGPU=$(lspci -v -s $(lspci | grep ' VGA ' | cut -d" " -f 1) | grep -E 'nvidia' | awk '{print $5}')
+TLSPCI=$(command -v lspci)
+
 while true; do
-  if [[ $TLSPCI == "true" ]]; then
-     echo "lspci found" && break
-  else
+  if [[ ! -x "$TLSPCI" ]]; then
      echo "lspci not found" && break
+  else
+     echo "lspci found"
   fi
+  if [[ $IGPU == "i915" && $NGPU == "" ]]; then
+     echo "IGPU" && break
+  fi
+  if [[ $IGPU == "i915" && $NGPU == "nvidia" ]]; then
+     echo "IGPU && NVIDIA GPU" && break
+  fi
+  if [[ $IGPU == "" && $NGPU == "nvidia" ]]; then
+     echo "NVIDIA GPU" && break
+  fi
+
 done 
