@@ -42,7 +42,7 @@ if [[ $CHK == "false" ]]; then
 fi
 }
 
-nvidiainstall{} (
+nvidiainstall() {
 CHKNV=$(command -v nvidia-smi)
 if [[ ! -x "$CHKNV" ]]; then
    package_list="update upgrade nvidia-container-toolkit nvidia-container-runtime"
