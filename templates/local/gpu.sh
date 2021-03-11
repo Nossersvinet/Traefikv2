@@ -7,8 +7,8 @@
 ################################################################################
 #FUNCTIONS
 
-IGPU=$(lshw -C display | grep -q 'i915' && echo true || echo false && echo true || echo false)
-NGPU=$(lshw -C display | grep -q 'nvidia' && echo true || echo false && echo true || false)
+IGPU=$(lshw -C video | grep -qE 'i915' && echo true || echo false)
+NGPU=$(lshw -C video | grep -qE 'nvidia' && echo true || echo false)
 TLSPCI=$(command -v lshw)
 
 while true; do
