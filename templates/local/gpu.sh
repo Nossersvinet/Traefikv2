@@ -38,7 +38,6 @@ else
 fi
 }
 
-
 igpuhetzner() {
 ITE=$(cat /etc/modprobe.d/blacklist-hetzner.conf | grep -qE "#blacklist i915" && echo true || echo false)
 IMO=$(cat /etc/default/grub | grep -qE 'GRUB_CMDLINE_LINUX_DEFAULT="nomodeset consoleblank=0"' && echo true || echo false)
