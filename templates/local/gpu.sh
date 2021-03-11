@@ -29,6 +29,54 @@ while true; do
 done
 
 ##IGPU
+htest() {
+HMOD=$(ls /etc/modprobe.d/ | grep -qE "hetzner" && echo true || echo false)
+if [[ $HNOD != "false" ]]; then
+   echo " blacklist-hetzner.conf found "
+else
+   echo " blacklist-hetzner.conf not found "
+fi
+}
+
+
+igpuhetzner() {
+ITE=$(cat /etc/modprobe.d/blacklist-hetzner.conf | grep -qE "#blacklist i915" && echo true || echo false)
+IMO=$(cat /etc/default/grub | grep -qE 'GRUB_CMDLINE_LINUX_DEFAULT="nomodeset consoleblank=0"' && echo true || echo false)
+GVIDEO=$(id $(whoami) | grep -qE 'video' && echo true || echo false)
+DEVT=$(ls /dev/dri 1>/dev/null 2>&1 && echo true || echo false)
+VIFO=$(command -v vainfo)
+
+if [[ $ITE == "false" ]]; then
+   sed -i "s/blacklist i915/#blacklist i915/g" /etc/modprobe.d/blacklist-hetzner.conf
+fi
+if [[ $IMO == "false" ]]; then
+   sed -i "s/GRUB_CMDLINE_LINUX_DEFAUL/#GRUB_CMDLINE_LINUX_DEFAUL/g" /etc/modprobe.d/blacklist-hetzner.conf
+fi
+if [[ $IMO == "true" && $ITE == "true" ]]; then
+   update-grub
+fi
+if [[ $GVIDEO != "true" ]]; then
+   usermod -aG video $(whoami)
+fi
+if [[ $DEVT != "false" ]]; then
+   chmod -R 750 /dev/dri
+else
+   echo ""
+   printf "\033[0;31m You need to restart the server to get access to /dev/dri
+
+   after restarting execute the install again\033[0m\n"
+   echo ""
+   read -p "Type confirm if you wish to continue: " input
+   if [[ "$input" = "confirm" ]]; then
+      reboot -n
+   else
+      igpuhetzner
+   fi
+fi
+if [[ ! -f "$VIFO" ]]; then
+   apt install vainfo -yqq
+fi
+}
 
 ##NVIDIA
 nvidiarepo() {
