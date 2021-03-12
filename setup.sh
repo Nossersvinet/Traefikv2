@@ -42,11 +42,11 @@ while true; do
      cp /opt/traefik/templates/local/daemon.j2 /etc/docker/daemon.json
      curl --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
   fi
-  dockertest=$(systemctl is-active docker | grep "active" && echo true || echo false)
+  dockertest=$(systemctl is-active docker | grep -qE 'active' && echo true || echo false)
   if [[ $dockertest != "false" ]]; then systemctl reload-or-restart docker.service >/dev/null 2>1 && systemctl enable docker.service >/dev/null 2>&1; fi
-  mntcheck=$(docker volume ls | grep unionfs | head -n1 && echo true || echo false)
+  mntcheck=$(docker volume ls | grep -qE 'unionfs' && echo true || echo false)
   if [[ $mntcheck == "false" ]]; then bash /opt/traefik/templates/local/install.sh >/dev/null 2>&1 && docker volume create -d local-persist -o mountpoint=/mnt --name=unionfs >/dev/null 2>&1; fi
-  networkcheck=$(docker network ls | grep "proxy" | tail -n 2 && echo true || echo false)
+  networkcheck=$(docker network ls | grep -qE 'proxy' && echo true || echo false)
   if [[ $networkcheck == "false" ]]; then docker network create --driver=bridge proxy >/dev/null 2>1; fi
   if [[ ! -x "$(command -v docker-compose)" ]]; then
      COMPOSE_VERSION=$(curl --silent -fsSL https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
@@ -58,7 +58,7 @@ while true; do
   fi
   if [[ ! -x "$(command -v fail2ban-client)" ]]; then apt install fail2ban -yqq >/dev/null 2>&1; fi
   LOCALMOD=$(cat /etc/fail2ban/jail.local && echo true || echo false)
-  MOD=$(cat /etc/fail2ban/jail.local | grep [authelia] && echo true || echo false)
+  MOD=$(cat /etc/fail2ban/jail.local | grep -qE '\[authelia\]' && echo true || echo false)
   if [[ $LOCALMOD == "false" ]]; then cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local; fi
   if [[ $MOD == "false" ]]; then
      echo "\
@@ -77,14 +77,14 @@ chain = DOCKER-USER">> /etc/fail2ban/jail.local
   sed -i "s#rotate 4#rotate 1#g" /etc/logrotate.conf
   sed -i "s#weekly#daily#g" /etc/logrotate.conf
   fi
-  f2ban=$(systemctl is-active fail2ban | grep "active" && echo true || echo false)
+  f2ban=$(systemctl is-active fail2ban | grep -qE 'active' && echo true || echo false)
   if [[ $f2ban != "false" ]]; then
      systemctl reload-or-restart fail2ban.service >/dev/null 2>&1
      systemctl enable fail2ban.service >/dev/null 2>&1
   fi
   if [[ ! -x "$(command -v rsync)" ]]; then apt install rsync -yqq >/dev/null 2>&1; fi
      rsync /opt/traefik/templates/ /opt/appdata/ -aq --info=progress2 -hv --exclude local
-  if [[ -x "$(command -v rsync)" ]]; then  apt purge rsync -yqq  >/dev/null 2>&1; fi
+  if [[ -x "$(command -v rsync)" ]]; then apt purge rsync -yqq  >/dev/null 2>&1; fi
   optfolder="/opt/appdata"
   for i in ${optfolder}; do
       mkdir -p $i/{authelia,traefik,compose,portainer} \
