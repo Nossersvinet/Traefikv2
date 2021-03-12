@@ -41,7 +41,7 @@ VIFO=$(command -v vainfo)
 if [[ $HNOD != "false" ]]; then
    echo " blacklist-hetzner.conf found "
 else
-   echo " blacklist-hetzner.conf not found "
+   echo " blacklist-hetzner.conf not found " && exit  0
 fi
 if [[ $ITE == "false" ]]; then
    sed -i "s/blacklist i915/#blacklist i915/g" /etc/modprobe.d/blacklist-hetzner.conf
