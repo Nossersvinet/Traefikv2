@@ -33,7 +33,7 @@ done
 igpuhetzner() {
 HMOD=$(ls /etc/modprobe.d/ | grep -qE "hetzner" && echo true || echo false)
 ITE=$(cat /etc/modprobe.d/blacklist-hetzner.conf | grep -qE "#blacklist i915" && echo true || echo false)
-IMO=$(cat /etc/default/grub | grep -qE 'GRUB_CMDLINE_LINUX_DEFAULT="nomodeset consoleblank=0"' && echo true || echo false)
+IMO=$(cat /etc/default/grub | grep -qE 'GRUB_CMDLINE_LINUX_DEFAULT' && echo true || echo false)
 GVIDEO=$(id $(whoami) | grep -qE 'video' && echo true || echo false)
 DEVT=$(ls /dev/dri 1>/dev/null 2>&1 && echo true || echo false)
 VIFO=$(command -v vainfo)
