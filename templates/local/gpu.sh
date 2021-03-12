@@ -15,11 +15,11 @@ while true; do
   if [[ -x "$TLSPCI" ]]; then
      echo "lshw found"
      if [[ "$IGPU" == "true" && $NGPU == "false" ]]; then
-        echo "IGPU" && break
+        igpuhetzner && break
      elif [[ "$IGPU" == "true" && "$NGPU" == "true" ]]; then
-        echo "IGPU & NVIDIA GPU" && break
+        nvidiagpu && break
      elif [[ "$IGPU" == "false" && "$NGPU" == "true" ]]; then
-        echo "NVIDIA GPU" && break
+        nvidiagpu && break
      else
         echo "nothing found " && break
      fi
@@ -28,23 +28,21 @@ while true; do
   fi
 done
 
-##IGPU
-htest() {
-HMOD=$(ls /etc/modprobe.d/ | grep -qE "hetzner" && echo true || echo false)
-if [[ $HNOD != "false" ]]; then
-   echo " blacklist-hetzner.conf found "
-else
-   echo " blacklist-hetzner.conf not found "
-fi
-}
 
+##IGPU
 igpuhetzner() {
+HMOD=$(ls /etc/modprobe.d/ | grep -qE "hetzner" && echo true || echo false)
 ITE=$(cat /etc/modprobe.d/blacklist-hetzner.conf | grep -qE "#blacklist i915" && echo true || echo false)
 IMO=$(cat /etc/default/grub | grep -qE 'GRUB_CMDLINE_LINUX_DEFAULT="nomodeset consoleblank=0"' && echo true || echo false)
 GVIDEO=$(id $(whoami) | grep -qE 'video' && echo true || echo false)
 DEVT=$(ls /dev/dri 1>/dev/null 2>&1 && echo true || echo false)
 VIFO=$(command -v vainfo)
 
+if [[ $HNOD != "false" ]]; then
+   echo " blacklist-hetzner.conf found "
+else
+   echo " blacklist-hetzner.conf not found "
+fi
 if [[ $ITE == "false" ]]; then
    sed -i "s/blacklist i915/#blacklist i915/g" /etc/modprobe.d/blacklist-hetzner.conf
 fi
@@ -78,8 +76,13 @@ fi
 }
 
 ##NVIDIA
-nvidiarepo() {
+nvidiagpu() {
+DREA=$(pidof dockerd && echo true || echo false)
+CHKNV=$(ls /usr/bin/nvidia-smi 1>/dev/null 2>&1 && echo true || echo false)
+DCHK=$(cat /etc/docker/daemon.json | grep -qE 'nvidia' && echo true || echo false)
 CHK=$(cat /etc/apt/sources.list.d/nvidia-docker.list | grep -qE nvidia && echo true || echo false)
+DEVT=$(ls /dev/dri 1>/dev/null 2>&1 && echo true || echo false)
+
 if [[ $CHK == "false" ]]; then
    curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | \
      sudo apt-key add -
@@ -87,20 +90,12 @@ if [[ $CHK == "false" ]]; then
    curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | \
      sudo tee /etc/apt/sources.list.d/nvidia-docker.list
 fi
-}
-
-nvidiainstall() {
-CHKNV=$(command -v nvidia-smi)
-if [[ ! -x "$CHKNV" ]]; then
+if [[ $CHKNV != "true" ]]; then
    package_list="update upgrade nvidia-container-toolkit nvidia-container-runtime"
    for i in ${package_list}; do
        apt $i -yqq 1>/dev/null 2>&1
    done
 fi
-}
-
-dockerpart() {
-DCHK=$(cat /etc/docker/daemon.json | grep -qE 'nvidia' && echo true || echo false)
 if [[ $DCHK == "false" ]]; then
 sudo tee /etc/docker/daemon.json <<EOF
 {
@@ -114,21 +109,25 @@ sudo tee /etc/docker/daemon.json <<EOF
 }
 EOF
 fi
-}
-
-dockerdreload() {
-DREA=$(pidof dockerd && echo true || echo false)
 if [[ $DREA == "true" ]]; then
    pkill -SIGHUP dockerd
 fi
-}
+if [[ $DEVT != "false" ]]; then
+   chmod -R 750 /dev/dri
+else
+   echo ""
+   printf "\033[0;31m You need to restart the server to get access to /dev/dri
 
-nvlastchk() {
-DREA=$(pidof dockerd && echo true || echo false)
-DCHK=$(cat /etc/docker/daemon.json | grep -qE 'nvidia' && echo true || echo false)
-CHKNV=$(command -v nvidia-smi)
-
-if [[ $DREA == "true" && $DCHK == "true" && $CHKNV == "true" ]]; then
+   after restarting execute the install again\033[0m\n"
+   echo ""
+   read -p "Type confirm if you wish to continue: " input
+   if [[ "$input" = "confirm" ]]; then
+      reboot -n
+   else
+      nvidiagpu
+   fi
+fi
+if [[ $DREA == "true" && $DCHK == "true" && $CHKNV == "true" && $DEVT != "false" ]]; then
    echo " nvidia-container-runtime is working"
 else
    echo " nvidia-container-runtime is not working"
