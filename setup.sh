@@ -56,6 +56,13 @@ while true; do
      chmod a=rx,u+w /usr/local/bin/docker-compose >/dev/null 2>&1
      chmod a=rx,u+w /usr/bin/docker-compose >/dev/null 2>&1
   fi
+  gpu="i915 nvidia"
+  for i in ${gpu}; do
+      TDV=$(lshw -C video | grep -qE $i && echo true || echo false)
+      if [[ $TDV == "true" ]]; then
+         bash /opt/traefik/templates/local/gpu.sh
+      fi
+  done
   if [[ ! -x "$(command -v fail2ban-client)" ]]; then apt install fail2ban -yqq >/dev/null 2>&1; fi
   LOCALMOD=$(cat /etc/fail2ban/jail.local && echo true || echo false)
   MOD=$(cat /etc/fail2ban/jail.local | grep -qE '\[authelia\]' && echo true || echo false)
