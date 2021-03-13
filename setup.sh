@@ -52,6 +52,19 @@ sorry you need a clean server we cant update on top on $i\033[0m\n"
         find $i -exec chown -hR 1000:1000 {} \;
      done
   fi
+  config="/etc/sysctl.d/99-sysctl.conf"
+  ipv6=$(cat $config | grep -qE 'disable_ipv6' && echo true || false)
+  if [ -f $config ]; then
+     if [ $ipv6 != 'true' ] || [ $ipv6 == 'true' ]; then
+       grep -qE 'net.ipv6.conf.all.disable_ipv6 = 1' $config || \
+            echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> $config
+       grep -qE 'net.ipv6.conf.default.disable_ipv6 = 1' $config || \
+            echo 'net.ipv6.conf.default.disable_ipv6 = 1' >> $config
+       grep -qE 'net.ipv6.conf.lo.disable_ipv6 = 1' $config || \
+            echo 'net.ipv6.conf.lo.disable_ipv6 = 1' >> $config
+       sysctl -p -q
+    fi
+  fi
   if [[ ! -x "$(command -v docker)"  ]]; then
      package_list="update apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common"
      for i in ${package_list}; do
