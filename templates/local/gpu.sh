@@ -11,11 +11,11 @@ NGPU=$(lshw -C video | grep -qE 'nvidia' && echo true || echo false)
 TLSPCI=$(command -v lshw)
 
 while true; do
-  if [[ "$IGPU" == "true" && $NGPU == "false" ]]; then
+  if [[ $IGPU == "true" && $NGPU == "false" ]]; then
      igpuhetzner && break && exit
-  elif [[ "$IGPU" == "true" && "$NGPU" == "true" ]]; then
+  elif [[ $IGPU == "true" && $NGPU == "true" ]]; then
      nvidiagpu && break && exit
-  elif [[ "$IGPU" == "false" && "$NGPU" == "true" ]]; then
+  elif [[ $IGPU == "false" && $NGPU == "true" ]]; then
      nvidiagpu && break && exit
   else
      break && exit
