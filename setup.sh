@@ -91,7 +91,7 @@ sorry you need a clean server we cant update on top on $i\033[0m\n"
   dockertest=$(systemctl is-active docker | grep -qE 'active' && echo true || echo false)
   if [[ $dockertest != "false" ]]; then systemctl reload-or-restart docker.service >/dev/null 2>1 && systemctl enable docker.service >/dev/null 2>&1; fi
   mntcheck=$(docker volume ls | grep -qE 'unionfs' && echo true || echo false)
-  if [[ $mntcheck == "false" ]]; then bash /opt/traefik/templates/local/install.sh >/dev/null 2>&1 && docker volume create -d local-persist -o mountpoint=/mnt --name=unionfs >/dev/null 2>&1; fi
+  if [[ $mntcheck == "false" ]]; then bash /opt/traefik/templates/local/install.sh >/dev/null 2>&1 >/dev/null 2>&1; fi
   networkcheck=$(docker network ls | grep -qE 'proxy' && echo true || echo false)
   if [[ $networkcheck == "false" ]]; then docker network create --driver=bridge proxy >/dev/null 2>1; fi
   if [[ ! -x "$(command -v docker-compose)" ]]; then
