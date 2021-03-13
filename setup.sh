@@ -9,13 +9,35 @@
 updatesystem() {
 if [[ $EUID -ne 0 ]]; then
 tee <<-EOF
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⛔  You Must Execute as a SUDO USER (with sudo) or as ROOT!
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
 exit 0
 fi
 while true; do
+
+oldsinstall() {
+  oldsolutions="plexguide cloudbox"
+  for i in ${oldsolutions}; do
+      folders="/var/ /opt/ /home/"
+      for ii in ${folders}; do
+          show=$(find $ii -maxdepth 1 -type d -name $i -print)
+          if [[ $show != '' ]]; then
+             echo ""
+             printf "\033[0;31m You need reinstall your Server 
+sorry you need a clean server we cant update on top on $i\033[0m\n"
+             echo ""
+             read -p "Type confirm when you read the message: " input
+             if [[ "$input" = "confirm" ]]; then
+                 exit 0
+             else
+                oldsinstall
+             fi
+          fi
+      done
+  done
+}
   package_list="update upgrade dist-upgrade autoremove autoclean"
   for i in ${package_list}; do
       apt $i -yqq 1>/dev/null 2>&1
