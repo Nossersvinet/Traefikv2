@@ -66,9 +66,9 @@ sorry you need a clean server we cant update on top on $i\033[0m\n"
     fi
   fi
   if [[ ! -x "$(command -v docker)"  ]]; then
-     if [ -r /etc/os-release ]; then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
-     package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common"
-     package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common"
+     if [[ -r /etc/os-release ]]; then lsb_dist="$(. /etc/os-release && echo '$ID')"; fi
+        package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common"
+        package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common"
      if [[ $lsb_dist == 'ubuntu' ]]; then
         for i in ${package_listubuntu}; do
             apt install $i --reinstall -yqq 1>/dev/null 2>&1
@@ -293,11 +293,11 @@ interface
 
 jounanctlpatch() {
 CTPATCH=$(cat /etc/systemd/journald.conf | grep "#PATCH" && echo true || echo false)
-  if [[ $CTPATCH == "false" ]]; then
-     journalctl --flush 1>/dev/null 2>&1
-     journalctl --rotate 1>/dev/null 2>&1
-     journalctl --vacuum-time=1s 1>/dev/null 2>&1
-     find /var/log -name "*.gz" -delete 1>/dev/null 2>&1
+if [[ $CTPATCH == "false" ]]; then
+   journalctl --flush 1>/dev/null 2>&1
+   journalctl --rotate 1>/dev/null 2>&1
+   journalctl --vacuum-time=1s 1>/dev/null 2>&1
+   find /var/log -name "*.gz" -delete 1>/dev/null 2>&1
    echo "\
 
 #PATCH
