@@ -93,6 +93,7 @@ fi
 }
 
 endcommand() {
+DEVT=$(ls /dev/dri 1>/dev/null 2>&1 && echo true || echo false)
 if [[ $DEVT != "false" ]]; then
    chmod -R 750 /dev/dri
 else
@@ -100,7 +101,7 @@ else
    printf "\033[0;31m You need to restart the server to get access to /dev/dri
 after restarting execute the install again\033[0m\n"
    echo ""
-   read -p "Type confirm if you wish to reboot: " input
+   read -p "Type confirm to reboot: " input
    if [[ "$input" = "confirm" ]]; then
       reboot -n
    else
