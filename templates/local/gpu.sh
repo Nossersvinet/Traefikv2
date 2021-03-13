@@ -108,5 +108,3 @@ after restarting execute the install again\033[0m\n"
    fi
 fi
 }
-
-
