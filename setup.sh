@@ -25,7 +25,7 @@ oldsinstall() {
           show=$(find $ii -maxdepth 1 -type d -name $i -print)
           if [[ $show != '' ]]; then
              echo ""
-             printf "\033[0;31m You need reinstall your Server 
+             printf "\033[0;31m You need to reinstall your Server 
 sorry you need a clean server we cant update on top on $i\033[0m\n"
              echo ""
              read -p "Type confirm when you read the message: " input
