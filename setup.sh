@@ -86,6 +86,8 @@ sorry you need a clean server we cant update on top on $i\033[0m\n"
      cp /opt/traefik/templates/local/daemon.j2 /etc/docker/daemon.json
      curl --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
   fi
+  dockergroup=$(grep -qE docker /etc/group && echo true || echo false)
+  if [[ $dockergroup == "true" ]]; then usermod -aG docker $(whoami);fi
   dockertest=$(systemctl is-active docker | grep -qE 'active' && echo true || echo false)
   if [[ $dockertest != "false" ]]; then systemctl reload-or-restart docker.service >/dev/null 2>1 && systemctl enable docker.service >/dev/null 2>&1; fi
   mntcheck=$(docker volume ls | grep -qE 'unionfs' && echo true || echo false)
