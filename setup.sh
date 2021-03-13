@@ -66,11 +66,20 @@ sorry you need a clean server we cant update on top on $i\033[0m\n"
     fi
   fi
   if [[ ! -x "$(command -v docker)"  ]]; then
-     package_list="update apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common"
-     for i in ${package_list}; do
-         apt $i -yqq 1>/dev/null 2>&1
-         sleep 1
-     done
+     if [ -r /etc/os-release ]; then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
+     package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common"
+     package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common"
+     if [[ $lsb_dist == 'ubuntu' ]]; then
+        for i in ${package_listubuntu}; do
+            apt install $i --reinstall -yqq 1>/dev/null 2>&1
+            sleep 1
+        done
+     else
+        for i in ${package_listdebian}; do
+            apt install $i --reinstall -yqq 1>/dev/null 2>&1
+            sleep 1
+        done
+     fi
      curl --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
      cp /opt/traefik/templates/local/daemon.j2 /etc/docker/daemon.json
   else
