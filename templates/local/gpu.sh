@@ -5,23 +5,6 @@
 # URL:        https://sudobox.io/
 # GNU:        General Public License v3.0
 ################################################################################
-#FUNCTIONS
-IGPU=$(lshw -C video | grep -qE 'i915' && echo true || echo false)
-NGPU=$(lshw -C video | grep -qE 'nvidia' && echo true || echo false)
-TLSPCI=$(command -v lshw)
-
-while true; do
-  if [[ $IGPU == "true" && $NGPU == "false" ]]; then
-     igpuhetzner && break && exit
-  elif [[ $IGPU == "true" && $NGPU == "true" ]]; then
-     nvidiagpu && break && exit
-  elif [[ $IGPU == "false" && $NGPU == "true" ]]; then
-     nvidiagpu && break && exit
-  else
-     break && exit
-  fi
-done
-
 ##IGPU
 igpuhetzner() {
 HMOD=$(ls /etc/modprobe.d/ | grep -qE 'hetzner' && echo true || echo false)
@@ -33,8 +16,9 @@ VIFO=$(command -v vainfo)
 if [[ $HMOD == "false" ]]; then exit 0; fi
 if [[ $ITE == "false" ]]; then sed -i "s/blacklist i915/#blacklist i915/g" /etc/modprobe.d/blacklist-hetzner.conf; fi
 if [[ $IMO == "false" ]]; then sed -i "s/GRUB_CMDLINE_LINUX_DEFAUL/#GRUB_CMDLINE_LINUX_DEFAUL/g" /etc/modprobe.d/blacklist-hetzner.conf; fi
-if [[ $IMO == "true" && $ITE == "true" ]]; then update-grub; fi
+if [[ $IMO == "true" && $ITE == "true" ]]; then update-grub 1>/dev/null 2>&1; fi
 if [[ $GVIDEO == "false" ]]; then usermod -aG video $(whoami); fi
+if [[ ! -f $VIFO ]]; then apt install vainfo -yqq; fi
 endcommand
 if [[ $IMO == "true" && $ITE == "true" && $GVIDEO == "true" && $DEVT == "true" ]]; then
    echo "Intel IGPU is working"
@@ -91,7 +75,6 @@ else
    echo " nvidia-container-runtime is not working"
 fi
 }
-
 endcommand() {
 DEVT=$(ls /dev/dri 1>/dev/null 2>&1 && echo true || echo false)
 if [[ $DEVT != "false" ]]; then
@@ -109,3 +92,19 @@ after restarting execute the install again\033[0m\n"
    fi
 fi
 }
+## EXECUTE
+IGPU=$(lshw -C video | grep -qE 'i915' && echo true || echo false)
+NGPU=$(lshw -C video | grep -qE 'nvidia' && echo true || echo false)
+TLSPCI=$(command -v lshw)
+
+while true; do
+  if [[ $IGPU == "true" && $NGPU == "false" ]]; then
+     igpuhetzner && break && exit
+  elif [[ $IGPU == "true" && $NGPU == "true" ]]; then
+     nvidiagpu && break && exit
+  elif [[ $IGPU == "false" && $NGPU == "true" ]]; then
+     nvidiagpu && break && exit
+  else
+     break && exit
+  fi
+done
