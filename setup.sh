@@ -16,7 +16,7 @@ EOF
 exit 0
 fi
 while true; do
-oldsinstall
+  oldsinstall && proxydel
   package_list="update upgrade dist-upgrade autoremove autoclean"
   for i in ${package_list}; do
       apt $i -yqq 1>/dev/null 2>&1
@@ -46,17 +46,17 @@ oldsinstall
   fi
   if [[ ! -x "$(command -v docker)"  ]]; then
      if [[ -r /etc/os-release ]]; then lsb_dist="$(. /etc/os-release && echo '$ID')"; fi
-        package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common"
-        package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common"
+        package_listubuntu="apt-transport-https ca-certificates curl git wget gnupg-agent software-properties-common"
+        package_listdebian="apt-transport-https ca-certificates curl git wget gnupg-agent gnupg2 software-properties-common"
      if [[ $lsb_dist == 'ubuntu' ]]; then
         for i in ${package_listubuntu}; do
             apt install $i --reinstall -yqq 1>/dev/null 2>&1
-            sleep 1
+            sleep 0.5
         done
      else
         for i in ${package_listdebian}; do
             apt install $i --reinstall -yqq 1>/dev/null 2>&1
-            sleep 1
+            sleep 0.5
         done
      fi
      curl --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
@@ -153,6 +153,15 @@ sorry you need a clean server we cant update on top on $i\033[0m\n"
           fi
       done
   done
+}
+proxydel() {
+delproxy="apache2 nginx"
+for i in ${delproxy}; do
+    systemctl stop $i >/dev/null 2>&1
+    systemctl disable $i >/dev/null 2>&1
+    apt remove $i -yqq >/dev/null 2>&1
+    apt purge $i -yqq >/dev/null 2>&1
+done
 }
 ########## FUNCTIONS START
 domain() {
@@ -416,16 +425,16 @@ tee <<-EOF
 EOF
   read -p '↘️  Type Number | Press [ENTER]: ' typed </dev/tty
   case $typed in
-  1) domain && interface ;;
-  2) displayname && interface ;;
-  3) password && interface ;;
-  4) cfemail && interface ;;
-  5) cfkey && interface ;;
-  d) deploynow && interface ;;
-  D) deploynow && interface ;;
+  1) domain && clear && interface ;;
+  2) displayname && clear && interface ;;
+  3) password && clear && interface ;;
+  4) cfemail && clear && interface ;;
+  5) cfkey && clear && interface ;;
+  d) deploynow && clear && interface ;;
+  D) deploynow && clear && interface ;;
   z) exit 0 ;;
   Z) exit 0 ;;
-  *) interface ;;
+  *) clear && interface ;;
   esac
 }
 # FUNCTIONS END ##############################################################
