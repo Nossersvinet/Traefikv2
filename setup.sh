@@ -24,7 +24,7 @@ while true; do
   if [[ ! -d "/mnt/downloads" && ! -d "/mnt/unionfs" ]]; then
      basefolder="/mnt"
      for i in ${basefolder}; do
-         $(command -v mkidr) -p $i/{unionfs,downloads,incomplete,torrent,nzb} \
+         $(command -v mkdir) -p $i/{unionfs,downloads,incomplete,torrent,nzb} \
                   $i/{incomplete,downloads}/{nzb,torrent}/{movies,tv,tv4k,movies4k,movieshdr,tvhdr,remux} \
                   $i/{torrent,nzb}/watch
         $(command -v find) $i -exec $(command -v chmod) a=rx,u+w {} \;
@@ -129,7 +129,7 @@ chain = DOCKER-USER">> /etc/fail2ban/jail.local
   if [[ -x $(command -v rsync) ]]; then $(command -v apt) purge rsync -yqq  >/dev/null 2>&1; fi
   optfolder="/opt/appdata"
   for i in ${optfolder}; do
-      $(command -v mkidr) -p $i/{authelia,traefik,compose,portainer} \
+      $(command -v mkdir) -p $i/{authelia,traefik,compose,portainer} \
                $i/traefik/{rules,acme}
       $(command -v find) $i/{authelia,traefik,compose,portainer} -exec $(command -v chown) -hR 1000:1000 {} \;
   done
