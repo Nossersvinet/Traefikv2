@@ -169,7 +169,7 @@ delproxy="apache2 nginx"
 for i in ${delproxy}; do
     $(command -v systemctl) stop $i >/dev/null 2>&1
     $(command -v systemctl) disable $i >/dev/null 2>&1
-    $(command -v apt)remove $i -yqq >/dev/null 2>&1
+    $(command -v apt) remove $i -yqq >/dev/null 2>&1
     $(command -v apt) purge $i -yqq >/dev/null 2>&1
 done
 }
