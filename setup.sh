@@ -19,16 +19,16 @@ while true; do
   oldsinstall && proxydel
   package_list="update upgrade dist-upgrade autoremove autoclean"
   for i in ${package_list}; do
-      apt $i -yqq 1>/dev/null 2>&1
+      $(command -v apt) $i -yqq 1>/dev/null 2>&1
   done
   if [[ ! -d "/mnt/downloads" && ! -d "/mnt/unionfs" ]]; then
      basefolder="/mnt"
      for i in ${basefolder}; do
-         mkdir -p $i/{unionfs,downloads,incomplete,torrent,nzb} \
+         $(command -v mkidr) -p $i/{unionfs,downloads,incomplete,torrent,nzb} \
                   $i/{incomplete,downloads}/{nzb,torrent}/{movies,tv,tv4k,movies4k,movieshdr,tvhdr,remux} \
                   $i/{torrent,nzb}/watch
-        find $i -exec chmod a=rx,u+w {} \;
-        find $i -exec chown -hR 1000:1000 {} \;
+        $(command -v find) $i -exec $(command -v chmod) a=rx,u+w {} \;
+        $(command -v find) $i -exec $(command -v chown) -hR 1000:1000 {} \;
      done
   fi
   config="/etc/sysctl.d/99-sysctl.conf"
@@ -44,19 +44,19 @@ while true; do
        sysctl -p -q
     fi
   fi
-  if [[ ! -x "$(command -v docker)"  ]]; then
-     if [[ -r /etc/os-release ]]; then lsb_dist="$(. /etc/os-release && echo '$ID')"; fi
-        package_listubuntu="apt-transport-https ca-certificates curl git wget gnupg-agent software-properties-common"
-        package_listdebian="apt-transport-https ca-certificates curl git wget gnupg-agent gnupg2 software-properties-common"
+  if [[ ! -x $(command -v docker)  ]]; then
+     if [[ -r /etc/os-release ]]; then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
+        package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common"
+        package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common"
      if [[ $lsb_dist == 'ubuntu' ]]; then
         for i in ${package_listubuntu}; do
-            apt install $i --reinstall -yqq 1>/dev/null 2>&1
-            sleep 0.5
+            $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1
+            sleep 1
         done
      else
         for i in ${package_listdebian}; do
-            apt install $i --reinstall -yqq 1>/dev/null 2>&1
-            sleep 0.5
+            $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1
+            sleep 1
         done
      fi
      curl --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
@@ -67,28 +67,38 @@ while true; do
   fi
   dockergroup=$(grep -qE docker /etc/group && echo true || echo false)
   if [[ $dockergroup == "false" ]]; then usermod -aG docker $(whoami);fi
-  dockertest=$(systemctl is-active docker | grep -qE 'active' && echo true || echo false)
-  if [[ $dockertest != "false" ]]; then systemctl reload-or-restart docker.service >/dev/null 2>1 && systemctl enable docker.service >/dev/null 2>&1; fi
+  dockertest=$($(command -v systemctl) is-active docker | grep -qE 'active' && echo true || echo false)
+  if [[ $dockertest != "false" ]]; then $(command -v systemctl) reload-or-restart docker.service >/dev/null 2>1 && $(command -v systemctl) enable docker.service >/dev/null 2>&1; fi
   mntcheck=$(docker volume ls | grep -qE 'unionfs' && echo true || echo false)
   if [[ $mntcheck == "false" ]]; then bash /opt/traefik/templates/local/install.sh >/dev/null 2>&1 >/dev/null 2>&1; fi
   networkcheck=$(docker network ls | grep -qE 'proxy' && echo true || echo false)
   if [[ $networkcheck == "false" ]]; then docker network create --driver=bridge proxy >/dev/null 2>1; fi
-  if [[ ! -x "$(command -v docker-compose)" ]]; then
+  if [[ ! -x $(command -v docker-compose) ]]; then
      COMPOSE_VERSION=$(curl --silent -fsSL https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
      sh -c "curl --silent -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose"
      sh -c "curl --silent -L https://raw.githubusercontent.com/docker/compose/${COMPOSE_VERSION}/contrib/completion/bash/docker-compose > /etc/bash_completion.d/docker-compose"
      if [[ ! -L "/usr/bin/docker-compose" ]]; then rm -f /usr/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose; fi
-     chmod a=rx,u+w /usr/local/bin/docker-compose >/dev/null 2>&1
-     chmod a=rx,u+w /usr/bin/docker-compose >/dev/null 2>&1
+     $(command -v chmod) a=rx,u+w /usr/local/bin/docker-compose >/dev/null 2>&1
+     $(command -v chmod) a=rx,u+w /usr/bin/docker-compose >/dev/null 2>&1
   fi
   gpu="i915 nvidia"
   for i in ${gpu}; do
       TDV=$(lshw -C video | grep -qE $i && echo true || echo false)
       if [[ $TDV == "true" ]]; then
-         bash /opt/traefik/templates/local/gpu.sh
+         $(command -v bash) /opt/traefik/templates/local/gpu.sh
       fi
   done
-  if [[ ! -x "$(command -v fail2ban-client)" ]]; then apt install fail2ban -yqq >/dev/null 2>&1; fi
+  if [[ ! -x $(command -v ansible) ]]; then
+     if [[ -r /etc/os-release ]]; then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
+        package_list="ansible dialog python3-lxml"
+        package_listdebian="apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367"
+        package_listubuntu="apt-add-repository --yes --update ppa:ansible/ansible"
+        if [[ $lsb_dist == 'ubuntu' ]]; then ${package_listubuntu} >/dev/null 2>1; else ${package_listdebian} >/dev/null 2>1;fi
+        for i in ${package_list}; do
+            $(command -v apt) install $i --reinstall -yqq >/dev/null 2>1
+        done
+  fi
+  if [[ ! -x $(command -v fail2ban-client) ]]; then $(command -v apt) install fail2ban -yqq >/dev/null 2>&1; fi
   LOCALMOD=$(cat /etc/fail2ban/jail.local && echo true || echo false)
   MOD=$(cat /etc/fail2ban/jail.local | grep -qE '\[authelia\]' && echo true || echo false)
   if [[ $LOCALMOD == "false" ]]; then cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local; fi
@@ -109,24 +119,24 @@ chain = DOCKER-USER">> /etc/fail2ban/jail.local
   sed -i "s#rotate 4#rotate 1#g" /etc/logrotate.conf
   sed -i "s#weekly#daily#g" /etc/logrotate.conf
   fi
-  f2ban=$(systemctl is-active fail2ban | grep -qE 'active' && echo true || echo false)
+  f2ban=$($(command -v systemctl) is-active fail2ban | grep -qE 'active' && echo true || echo false)
   if [[ $f2ban != "false" ]]; then
-     systemctl reload-or-restart fail2ban.service >/dev/null 2>&1
-     systemctl enable fail2ban.service >/dev/null 2>&1
+     $(command -v systemctl) reload-or-restart fail2ban.service >/dev/null 2>&1
+     $(command -v systemctl) enable fail2ban.service >/dev/null 2>&1
   fi
-  if [[ ! -x "$(command -v rsync)" ]]; then apt install rsync -yqq >/dev/null 2>&1; fi
-     rsync /opt/traefik/templates/ /opt/appdata/ -aq --info=progress2 -hv --exclude local
-  if [[ -x "$(command -v rsync)" ]]; then apt purge rsync -yqq  >/dev/null 2>&1; fi
+  if [[ ! -x $(command -v rsync) ]]; then $(command -v apt) install rsync -yqq >/dev/null 2>&1; fi
+     $(command -v rsync) /opt/traefik/templates/ /opt/appdata/ -aq --info=progress2 -hv --exclude local
+  if [[ -x $(command -v rsync) ]]; then $(command -v apt) purge rsync -yqq  >/dev/null 2>&1; fi
   optfolder="/opt/appdata"
   for i in ${optfolder}; do
-      mkdir -p $i/{authelia,traefik,compose,portainer} \
+      $(command -v mkidr) -p $i/{authelia,traefik,compose,portainer} \
                $i/traefik/{rules,acme}
-      find $i/{authelia,traefik,compose,portainer} -exec chown -hR 1000:1000 {} \;
+      $(command -v find) $i/{authelia,traefik,compose,portainer} -exec $(command -v chown) -hR 1000:1000 {} \;
   done
-  touch ${optfolder}/traefik/acme/acme.json \
+  $(command -v touch) ${optfolder}/traefik/acme/acme.json \
         ${optfolder}/traefik/traefik.log \
         ${optfolder}/authelia/authelia.log
-  chmod 600 ${optfolder}/traefik/traefik.log \
+  $(command -v chmod) 600 ${optfolder}/traefik/traefik.log \
             ${optfolder}/authelia/authelia.log \
             ${optfolder}/traefik/acme/acme.json
   break
@@ -157,10 +167,10 @@ sorry you need a clean server we cant update on top on $i\033[0m\n"
 proxydel() {
 delproxy="apache2 nginx"
 for i in ${delproxy}; do
-    systemctl stop $i >/dev/null 2>&1
-    systemctl disable $i >/dev/null 2>&1
-    apt remove $i -yqq >/dev/null 2>&1
-    apt purge $i -yqq >/dev/null 2>&1
+    $(command -v systemctl) stop $i >/dev/null 2>&1
+    $(command -v systemctl) disable $i >/dev/null 2>&1
+    $(command -v apt)remove $i -yqq >/dev/null 2>&1
+    $(command -v apt) purge $i -yqq >/dev/null 2>&1
 done
 }
 ########## FUNCTIONS START
@@ -308,7 +318,7 @@ if [[ $CTPATCH == "false" ]]; then
    journalctl --flush 1>/dev/null 2>&1
    journalctl --rotate 1>/dev/null 2>&1
    journalctl --vacuum-time=1s 1>/dev/null 2>&1
-   find /var/log -name "*.gz" -delete 1>/dev/null 2>&1
+   $(command -v find) /var/log -name "*.gz" -delete 1>/dev/null 2>&1
    echo "\
 
 #PATCH
@@ -368,7 +378,7 @@ serverip
 settime
 ccontainer
 
-cd /opt/appdata/compose && docker-compose up -d --force-recreate 1>/dev/null 2>&1 && sleep 5
+cd /opt/appdata/compose && $(command -v docker-compose) up -d --force-recreate 1>/dev/null 2>&1 && sleep 5
 while true; do
   container="authelia traefik traefik-error-pages"
   for i in ${container}; do

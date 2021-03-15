@@ -28,8 +28,8 @@ if [[ $IMOL == "false" ]]; then sed -i "s/GRUB_CMDLINE_LINUX_DEFAUL/#GRUB_CMDLIN
 if [[ $IMOL == "true" && $ITEL == "true" ]]; then update-grub 1>/dev/null 2>&1; fi
 if [[ $GCHK == "false" ]]; then groupadd -f video 1>/dev/null 2>&1; fi
 if [[ $GVID == "false" ]]; then usermod -aG video $(whoami) 1>/dev/null 2>&1; fi
-if [[ $VIFO == "false" ]]; then apt install vainfo -yqq; fi
-if [[ $INTE == "false" && $IGPU == "true" ]]; then apt update -yqq && apt install intel-gpu-tools -yqq; fi
+if [[ $VIFO == "false" ]]; then $(command -v apt) install vainfo -yqq; fi
+if [[ $INTE == "false" && $IGPU == "true" ]]; then $(command -v apt) update -yqq && $(command -v apt) install intel-gpu-tools -yqq; fi
 endcommand
 if [[ $IMOL == "true" && $ITEL == "true" && $GVID == "true" && $DEVT == "true" ]]; then echo "Intel IGPU is working"; else echo "Intel IGPU is not working"; fi
 }
@@ -44,10 +44,10 @@ if [[ $CHKN != "true" ]]; then
    package_list="nvidia-container-toolkit nvidia-container-runtime"
    packageup="update upgrade dist-upgrade"
    for i in ${packageup}; do
-       apt $i -yqq 1>/dev/null 2>&1
+       $(command -v apt) $i -yqq 1>/dev/null 2>&1
    done
    for i in ${package_list}; do
-       apt install $i -yqq 1>/dev/null 2>&1
+       $(command -v apt) install $i -yqq 1>/dev/null 2>&1
    done
 fi
 if [[ $DCHK == "false" ]]; then
@@ -70,7 +70,7 @@ if [[ $DREA == "true" && $DCHK == "true" && $CHKN == "true" && $DEVT != "false" 
 }
 endcommand() {
 if [[ $DEVT != "false" ]]; then
-   chmod -R 750 /dev/dri
+   $(command -v chmod) -R 750 /dev/dri
 else
    echo ""
    printf "\033[0;31m You need to restart the server to get access to /dev/dri
