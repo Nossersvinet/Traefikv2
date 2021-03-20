@@ -4,9 +4,7 @@
 # Author(s):  mrdoob
 # URL:        https://sudobox.io/
 # GNU:        General Public License v3.0
-################################################################################
-#FUNCTIONS
-# Detect OS
+################################################
 case $(. /etc/os-release && echo "$ID") in
     ubuntu)     type="ubuntu" ;;
     debian)     type="ubuntu" ;;
