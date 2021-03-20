@@ -46,8 +46,8 @@ while true; do
   fi
   if [[ ! -x $(command -v docker)  ]]; then
      if [[ -r /etc/os-release ]]; then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
-        package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common"
-        package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common"
+        package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common language-pack-en-base"
+        package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common language-pack-en-base"
      if [[ $lsb_dist == 'ubuntu' ]]; then
         for i in ${package_listubuntu}; do
             $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1
@@ -379,7 +379,8 @@ fi
 }
 
 deploynow() {
-
+  export LC_ALL=en_US.UTF-8
+  export LANG=en_US.UTF-8
 jounanctlpatch
 serverip
 ccontainer
