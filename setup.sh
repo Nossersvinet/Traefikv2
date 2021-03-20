@@ -311,6 +311,29 @@ else
 fi
 interface
 }
+cfzoneid() {
+tee <<-EOF
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 Cloudflare Global-Key
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+EOF
+   read -ep "Whats your CloudFlare-Zone-ID: " CFZONEID
+
+if [[ $CFZONEID != "" ]]; then
+   if [[ $(uname) == "Darwin" ]]; then
+      sed -i '' "s/example-CF-ZONE_ID/$CFZONEID/g" /opt/appdata/compose/docker-compose.yml
+   else
+      sed -i "s/example-CF-ZONE_ID/$CFZONEID/g" /opt/appdata/compose/docker-compose.yml
+   fi
+else
+  echo "CloudFlare-Zone-ID cannot be empty"
+  cfzoneid
+fi
+interface
+}
+
 
 jounanctlpatch() {
 CTPATCH=$(cat /etc/systemd/journald.conf | grep "#PATCH" && echo true || echo false)
@@ -355,27 +378,10 @@ else
 fi
 }
 
-settime() {
-TZTEST=$(command -v timedatectl && echo true || echo false)
-TZONE=$(timedatectl | grep "Time zone:" | awk '{print $3}')
-if [[ $TZTEST != "false" ]]; then 
-   if [[ $TZONE != "" ]]; then
-      if [[ $(uname) == "Darwin" ]]; then
-         sed -i '' "s/UTC/$TZONE/g" /opt/appdata/compose/docker-compose.yml
-      else
-         sed -i "s/UTC/$TZONE/g" /opt/appdata/compose/docker-compose.yml
-      fi
-   fi
-else
-  echo "timedatectl cannot be found, using default Timezone : UTC"
-fi
-}
-
 deploynow() {
 
 jounanctlpatch
 serverip
-settime
 ccontainer
 
 cd /opt/appdata/compose && $(command -v docker-compose) up -d --force-recreate 1>/dev/null 2>&1 && sleep 5
@@ -423,6 +429,7 @@ tee <<-EOF
 [3] Authelia Password                 [ $PASSWORD ]
 [4] CloudFlare-Email-Address          [ $EMAIL ]
 [5] CloudFlare-Global-Key             [ $CFGLOBAL ]
+[6] CloudFlare-Zone-ID                [ $CFZONEID ]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -440,6 +447,7 @@ EOF
   3) password && clear && interface ;;
   4) cfemail && clear && interface ;;
   5) cfkey && clear && interface ;;
+  6) cfzoneid && clear && interface ;;
   d) deploynow && clear && interface ;;
   D) deploynow && clear && interface ;;
   z) exit 0 ;;

@@ -78,6 +78,32 @@ services:
       - 'traefik.http.routers.traefik-rtr.service=api@internal'
       - 'traefik.http.routers.traefik-rtr.middlewares=chain-authelia@file'
 
+  cf-companion:
+    container_name: 'cf-companion'
+    image: 'tiredofit/traefik-cloudflare-companion:latest'
+    depends_on:
+      - traefik
+    networks:
+      - proxy
+    security_opt:
+      - 'no-new-privileges:true'
+    restart: 'always'
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock:ro'
+    environment:
+      - 'TIMEZONE=UTC'
+      - 'TRAEFIK_VERSION=2'
+      - 'CF_EMAIL=example-CF-EMAIL'
+      - 'CF_TOKEN=example-CF-API-KEY'
+      - 'TARGET_DOMAIN=example.com'
+      - 'DOMAIN1=example.com'
+      - 'DOMAIN1_ZONE_ID=example-CF-ZONE_ID'
+      - 'DOMAIN1_PROXIED=TRUE'
+      - 'DEFAULT_TTL=1'
+      - 'REFRESH_ENTRIES=TRUE'
+      - 'DOCKER_ENTRYPOINT=unix://var/run/docker.sock'
+      - 'SWARM_MODE=FALSE'
+
   traefik-error-pages:
     container_name: traefik-error-pages
     image: guillaumebriday/traefik-custom-error-pages
@@ -125,6 +151,7 @@ services:
       - 'traefik.http.routers.authelia-rtr.tls=true'
       - 'traefik.http.routers.authelia-rtr.service=authelia-svc'
       - 'traefik.http.services.authelia-svc.loadbalancer.server.port=9091'
+
 
   portainer:
     container_name: portainer
