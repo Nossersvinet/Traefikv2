@@ -8,8 +8,8 @@
 #FUNCTIONS
 # Detect OS
 case $(. /etc/os-release && echo "$ID") in
-    ubuntu)     type="basic" ;;
-    debian)     type="basic" ;;
+    ubuntu)     type="ubuntu" ;;
+    debian)     type="ubuntu" ;;
     *)          type='' ;;
 esac
 
