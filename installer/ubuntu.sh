@@ -38,7 +38,7 @@ while true; do
   config="/etc/sysctl.d/99-sysctl.conf"
   ipv6=$(cat $config | grep -qE 'ipv6' && echo true || false)
   if [ -f $config ]; then
-     if [ $ipv6 != 'true' ] || [ $ipv6 == 'true' ]; then
+     if [ $ipv6 != 'true' ] || [ $ipv6 == 'true' ];then
        grep -qE 'net.ipv6.conf.all.disable_ipv6 = 1' $config || \
             echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> $config
        grep -qE 'net.ipv6.conf.default.disable_ipv6 = 1' $config || \
@@ -48,11 +48,11 @@ while true; do
        sysctl -p -q
     fi
   fi
-  if [[ ! -x $(command -v docker)  ]]; then
+  if [[ ! -x $(command -v docker) ]];then
      if [[ -r /etc/os-release ]]; then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
         package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common language-pack-en-base lshw nano"
         package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common language-pack-en-base lshw nano"
-     if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]]; then
+     if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]];then
         for i in ${package_listubuntu}; do
             echo "install now $i"
             $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1
@@ -65,25 +65,25 @@ while true; do
             sleep 1
         done
      fi
-     curl --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
+     $(command -v curl) --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
      cp /opt/traefik/templates/local/daemon.j2 /etc/docker/daemon.json
   else
      cp /opt/traefik/templates/local/daemon.j2 /etc/docker/daemon.json
-     curl --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
+     $(command -v curl) --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
   fi
   dockergroup=$(grep -qE docker /etc/group && echo true || echo false)
   if [[ $dockergroup == "false" ]]; then usermod -aG docker $(whoami);fi
   dockertest=$($(command -v systemctl) is-active docker | grep -qE 'active' && echo true || echo false)
   if [[ $dockertest != "false" ]]; then $(command -v systemctl) reload-or-restart docker.service >/dev/null 2>1 && $(command -v systemctl) enable docker.service >/dev/null 2>&1; fi
-  mntcheck=$(docker volume ls | grep -qE 'unionfs' && echo true || echo false)
+  mntcheck=$($(command -v docker) volume ls | grep -qE 'unionfs' && echo true || echo false)
   if [[ $mntcheck == "false" ]]; then
-     curl -fsSL https://raw.githubusercontent.com/MatchbookLab/local-persist/master/scripts/install.sh | sudo bash
-     docker volume create -d local-persist -o mountpoint=/mnt --name=unionfs
+     curl --silent -fsSL https://raw.githubusercontent.com/MatchbookLab/local-persist/master/scripts/install.sh | sudo bash
+     $(command -v docker) volume create -d local-persist -o mountpoint=/mnt --name=unionfs
   fi
-  networkcheck=$(docker network ls | grep -qE 'proxy' && echo true || echo false)
-  if [[ $networkcheck == "false" ]]; then docker network create --driver=bridge proxy >/dev/null 2>1; fi
+  networkcheck=$($(command -v docker) network ls | grep -qE 'proxy' && echo true || echo false)
+  if [[ $networkcheck == "false" ]];then $(command -v docker) network create --driver=bridge proxy >/dev/null 2>1; fi
   if [[ ! -x $(command -v docker-compose) ]]; then
-     COMPOSE_VERSION=$(curl --silent -fsSL https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
+     COMPOSE_VERSION=$($(command -v curl) --silent -fsSL https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
      sh -c "curl --silent -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose"
      sh -c "curl --silent -L https://raw.githubusercontent.com/docker/compose/${COMPOSE_VERSION}/contrib/completion/bash/docker-compose > /etc/bash_completion.d/docker-compose"
      if [[ ! -L "/usr/bin/docker-compose" ]]; then rm -f /usr/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose; fi
@@ -93,11 +93,11 @@ while true; do
   if [[ -x $(command -v lshw) ]];then
       gpu="i915 nvidia"
       for i in ${gpu}; do
-          TDV=$(lshw -C video | grep -qE $i && echo true || echo false)
+          TDV=$($(command -v lshw) -C video | grep -qE $i && echo true || echo false)
           if [[ $TDV == "true" ]]; then $(command -v bash) ./templates/local/gpu.sh;fi
       done
   fi
-  if [[ ! -x $(command -v ansible) ]]; then
+  if [[ ! -x $(command -v ansible) ]];then
      if [[ -r /etc/os-release ]]; then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
         package_list="ansible dialog python3-lxml"
         package_listdebian="apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367"
@@ -263,8 +263,8 @@ EOF
    read -esp "Enter a password for $USERNAME: " PASSWORD
 
 if [[ $PASSWORD != "" ]]; then
-   docker pull authelia/authelia -q > /dev/null
-   PASSWORD=$(docker run authelia/authelia authelia hash-password $PASSWORD -i 2 -k 32 -m 128 -p 8 -l 32 | sed 's/Password hash: //g')
+   $(command -v docker) pull authelia/authelia -q > /dev/null
+   PASSWORD=$($(command -v docker) run authelia/authelia authelia hash-password $PASSWORD -i 2 -k 32 -m 128 -p 8 -l 32 | sed 's/Password hash: //g')
    JWTTOKEN=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
    SECTOKEN=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
    if [[ $(uname) == "Darwin" ]]; then
@@ -388,16 +388,16 @@ fi
 }
 
 ccont() {
-container=$(docker ps -aq --format '{{.Names}}' | grep -E 'trae|auth|error-pag')
+container=$($(command -v docker) ps -aq --format '{{.Names}}' | grep -E 'trae|auth|error-pag')
 for i in ${container}; do
-   docker stop $i 1>/dev/null 2>&1
-   docker rm $i 1>/dev/null 2>&1
-   docker image prune -af 1>/dev/null 2>&1
+   $(command -v docker) stop $i 1>/dev/null 2>&1
+   $(command -v docker) rm $i 1>/dev/null 2>&1
+   $(command -v docker) image prune -af 1>/dev/null 2>&1
 done
 }
 timezone() {
-TZTEST=$(command -v timedatectl && echo true || echo false)
-TZONE=$(timedatectl | grep "Time zone:" | awk '{print $3}')
+TZTEST=$($(command -v timedatectl) && echo true || echo false)
+TZONE=$($(command -v timedatectl) | grep "Time zone:" | awk '{print $3}')
 if [[ $TZTEST != "false" ]]; then
    if [[ $TZONE != "" ]]; then
       if [[ -f $basefolder/compose/.env ]];then sed -i '/TZ=/d' $basefolder/compose/.env;fi
@@ -438,7 +438,7 @@ cd $basefolder/compose && $(command -v docker-compose) up -d --force-recreate 1>
 while true; do
   container="authelia traefik traefik-error-pages"
   for i in ${container}; do
-      if [[ "$(docker container inspect -f '{{.State.Status}}' $i )" == "running" ]]; then echo " --> Container $i is up and running <--" && sleep 2; fi
+      if [[ "$($(command -v docker) container inspect -f '{{.State.Status}}' $i )" == "running" ]]; then echo " --> Container $i is up and running <--" && sleep 2; fi
   done
 break
 done
@@ -460,7 +460,7 @@ sleep 30
 while true; do
   container="authelia traefik traefik-error-pages"
   for i in ${container}; do
-      if [[ "$(docker container inspect -f '{{.State.Status}}' $i )" != "running" ]]; then deploynow && sleep 2; fi
+      if [[ "$($(command -v docker) container inspect -f '{{.State.Status}}' $i )" != "running" ]]; then deploynow && sleep 2; fi
   done
 break
 done
