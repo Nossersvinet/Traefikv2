@@ -403,9 +403,8 @@ if [[ $TZTEST != "false" ]]; then
 fi
 }
 cleanup() {
-listexited=$($(command -v docker) ps -aq --format '{{.State}}' | grep -E exited)
-rmstopped=$($listexited | awk '{print $1}')
-for i in ${rmstopped}; do
+listexited=$($(command -v docker) ps -aq --format '{{.State}}' | grep -E 'exited' | awk '{print $1}')
+for i in ${listexited}; do
     docker rm $i 1>/dev/null 2>&1
 done
 docker image prune -af 1>/dev/null 2>&1
