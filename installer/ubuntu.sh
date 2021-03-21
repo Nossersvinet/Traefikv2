@@ -1,6 +1,7 @@
 #!/bin/bash
 #
 # Title:      Traefikv2 with Authelia over Cloudflare
+# OS Branch:  ubuntu,debian,rasbian
 # Author(s):  mrdoob
 # URL:        https://sudobox.io/
 # GNU:        General Public License v3.0
@@ -125,7 +126,7 @@ chain = DOCKER-USER">> /etc/fail2ban/jail.local
      $(command -v systemctl) enable fail2ban.service >/dev/null 2>&1
   fi
   if [[ ! -x $(command -v rsync) ]]; then $(command -v apt) install rsync -yqq >/dev/null 2>&1; fi
-     $(command -v rsync) /opt/traefik/templates/ /opt/appdata/ -aq --info=progress2 -hv --exclude={'local/*','installer/*'}
+  $(command -v rsync) /opt/traefik/templates/ /opt/appdata/ -aq --info=progress2 -hv --exclude={'local/*','installer/*'}
   if [[ -x $(command -v rsync) ]]; then $(command -v apt) purge rsync -yqq  >/dev/null 2>&1; fi
   optfolder="/opt/appdata"
   for i in ${optfolder}; do
