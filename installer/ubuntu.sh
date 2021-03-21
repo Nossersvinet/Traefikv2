@@ -384,15 +384,13 @@ else
 fi
 }
 
-ccontainer() {
-container=$(docker ps -aq --format '{{.Names}}' | sed '/^$/d' | grep -E 'trae|auth|error-pag')
-if [[ $container != "" ]]; then
-   docker stop $container 1>/dev/null 2>&1
-   docker rm $container 1>/dev/null 2>&1
+ccont() {
+container=$(docker ps -aq --format '{{.Names}}' | grep -E 'trae|auth|error-pag')
+for i in ${container}; do
+   docker stop $i 1>/dev/null 2>&1
+   docker rm $i 1>/dev/null 2>&1
    docker image prune -af 1>/dev/null 2>&1
-else
-   docker image prune -af 1>/dev/null 2>&1
-fi
+do
 }
 timezone() {
 TZTEST=$(command -v timedatectl && echo true || echo false)
@@ -404,17 +402,30 @@ if [[ $TZTEST != "false" ]]; then
    fi
 fi
 }
+cleanup() {
+listexited=$($(command -v docker) ps -aq --format '{{.State}}' | grep -E exited)
+rmstopped=$($listexited | awk '{print $1}')
+for i in ${rmstopped}; do
+    docker rm $i 1>/dev/null 2>&1
+done
+docker image prune -af 1>/dev/null 2>&1
+}
+envcreate() {
+env0=$basefolder/compose/.env
+if [[ ! -f $env0 ]]; then
+   grep -qE 'ID=1000' $basefolder/compose/.env || \
+       echo 'ID=1000' >> $basefolder/compose/.env
+fi
+}
 ##############
 deploynow() {
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
-env0=$basefolder/compose/.env
-if [[ ! -f $env0 ]]; then
-echo -e "ID=1000" >> $basefolder/compose/.env
-fi
+envcreate
+cleanup
 jounanctlpatch
 serverip
-ccontainer
+ccont
 
 cd $basefolder/compose && $(command -v docker-compose) up -d --force-recreate 1>/dev/null 2>&1 && sleep 5
 while true; do
