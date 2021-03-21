@@ -398,7 +398,11 @@ TZONE=$(timedatectl | grep "Time zone:" | awk '{print $3}')
 if [[ $TZTEST != "false" ]]; then
    if [[ $TZONE != "" ]]; then
       if [[ -f $basefolder/compose/.env ]];then sed -i '/TZ=/d' $basefolder/compose/.env;fi
-      TZ=$TZONE && echo -e "TZ=${TZ}" >> $basefolder/compose/.env
+          TZ=$TZONE 
+          #echo "TZ=${TZ}" >> $basefolder/compose/.env
+          grep -qE 'TZ=${TZ}' $basefolder/compose/.env || \
+               echo 'TZ=${TZ}' >> $basefolder/compose/.env
+
    fi
 fi
 }
@@ -411,7 +415,7 @@ docker image prune -af 1>/dev/null 2>&1
 }
 envcreate() {
 env0=$basefolder/compose/.env
-if [[ ! -f $env0 ]]; then
+if [[ -f $env0 ]]; then
    grep -qE 'ID=1000' $basefolder/compose/.env || \
        echo 'ID=1000' >> $basefolder/compose/.env
 fi
@@ -421,6 +425,7 @@ deploynow() {
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 envcreate
+timezone
 cleanup
 jounanctlpatch
 serverip
