@@ -49,8 +49,8 @@ while true; do
   fi
   if [[ ! -x $(command -v docker)  ]]; then
      if [[ -r /etc/os-release ]]; then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
-        package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common language-pack-en-base"
-        package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common language-pack-en-base"
+        package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common language-pack-en-base lshw"
+        package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common language-pack-en-base lshw"
      if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]]; then
         for i in ${package_listubuntu}; do
             $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1
@@ -84,13 +84,13 @@ while true; do
      $(command -v chmod) a=rx,u+w /usr/local/bin/docker-compose >/dev/null 2>&1
      $(command -v chmod) a=rx,u+w /usr/bin/docker-compose >/dev/null 2>&1
   fi
-  gpu="i915 nvidia"
-  for i in ${gpu}; do
-      TDV=$(lshw -C video | grep -qE $i && echo true || echo false)
-      if [[ $TDV == "true" ]]; then
-         $(command -v bash) ./templates/local/gpu.sh
-      fi
-  done
+  if [[ -x $(command -v lshw) ]];then
+      gpu="i915 nvidia"
+      for i in ${gpu}; do
+          TDV=$(lshw -C video | grep -qE $i && echo true || echo false)
+          if [[ $TDV == "true" ]]; then $(command -v bash) ./templates/local/gpu.sh;fi
+      done
+  fi
   if [[ ! -x $(command -v ansible) ]]; then
      if [[ -r /etc/os-release ]]; then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
         package_list="ansible dialog python3-lxml"
@@ -102,9 +102,18 @@ while true; do
         done
   fi
   if [[ ! -x $(command -v fail2ban-client) ]]; then $(command -v apt) install fail2ban -yqq >/dev/null 2>&1; fi
-  LOCALMOD=$(cat /etc/fail2ban/jail.local && echo true || echo false)
-  MOD=$(cat /etc/fail2ban/jail.local | grep -qE '\[authelia\]' && echo true || echo false)
-  if [[ $LOCALMOD == "false" ]]; then cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local; fi
+      while true; do
+          f2ban=$($(command -v systemctl) is-active fail2ban | grep -qE 'active' && echo true || echo false)
+          if [[ $f2ban != 'true' ]];then
+              echo "Waiting for running fail2ban" && sleep 1 && continue
+          else
+              break
+          fi
+      done
+      ORGFILE="/etc/fail2ban/jail.conf"
+      LOCALMOD="/etc/fail2ban/jail.local"
+  if [[ ! -f $LOCALMOD ]]; then cp $ORGFILE $LOCALMOD; fi
+      MOD=$(cat $LOCALMOD | grep -qE '\[authelia\]' && echo true || echo false)
   if [[ $MOD == "false" ]]; then
      echo "\
 
