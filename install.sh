@@ -15,6 +15,6 @@ case $(. /etc/os-release && echo "$ID") in
     *)          type='' ;;
 esac
 
-if [ -e $type.sh ]; then
+if [ -f ./installer/$type.sh ]; then
     bash ./installer/$type.sh
 fi
