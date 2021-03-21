@@ -7,6 +7,7 @@
 # GNU:        General Public License v3.0
 ################################################################################
 #FUNCTIONS
+
 updatesystem() {
 if [[ $EUID -ne 0 ]]; then
 tee <<-EOF
@@ -17,6 +18,7 @@ EOF
 exit 0
 fi
 while true; do
+  basefolder="/opt/appdata"
   oldsinstall && proxydel
   package_list="update upgrade dist-upgrade autoremove autoclean"
   for i in ${package_list}; do
@@ -86,7 +88,7 @@ while true; do
   for i in ${gpu}; do
       TDV=$(lshw -C video | grep -qE $i && echo true || echo false)
       if [[ $TDV == "true" ]]; then
-         $(command -v bash) /opt/traefik/templates/local/gpu.sh
+         $(command -v bash) ./templates/local/gpu.sh
       fi
   done
   if [[ ! -x $(command -v ansible) ]]; then
@@ -126,20 +128,19 @@ chain = DOCKER-USER">> /etc/fail2ban/jail.local
      $(command -v systemctl) enable fail2ban.service >/dev/null 2>&1
   fi
   if [[ ! -x $(command -v rsync) ]]; then $(command -v apt) install rsync -yqq >/dev/null 2>&1; fi
-  $(command -v rsync) /opt/traefik/templates/ /opt/appdata/ -aq --info=progress2 -hv --exclude={'local/*','installer/*'}
+  $(command -v rsync) /opt/traefik/templates/ $basefolder/ -aq --info=progress2 -hv --exclude={'local','installer'}
   if [[ -x $(command -v rsync) ]]; then $(command -v apt) purge rsync -yqq  >/dev/null 2>&1; fi
-  optfolder="/opt/appdata"
-  for i in ${optfolder}; do
+  for i in ${basefolder}; do
       $(command -v mkdir) -p $i/{authelia,traefik,compose,portainer} \
                $i/traefik/{rules,acme}
       $(command -v find) $i/{authelia,traefik,compose,portainer} -exec $(command -v chown) -hR 1000:1000 {} \;
   done
-  $(command -v touch) ${optfolder}/traefik/acme/acme.json \
-        ${optfolder}/traefik/traefik.log \
-        ${optfolder}/authelia/authelia.log
-  $(command -v chmod) 600 ${optfolder}/traefik/traefik.log \
-            ${optfolder}/authelia/authelia.log \
-            ${optfolder}/traefik/acme/acme.json
+  $(command -v touch) ${basefolder}/traefik/acme/acme.json \
+        ${basefolder}/traefik/traefik.log \
+        ${basefolder}/authelia/authelia.log
+  $(command -v chmod) 600 ${basefolder}/traefik/traefik.log \
+            ${basefolder}/authelia/authelia.log \
+            ${basefolder}/traefik/acme/acme.json
   break
 done
 interface
@@ -197,13 +198,15 @@ else
    fi
    if [[ $DOMAIN != "example.com" ]]; then
       if [[ $(uname) == "Darwin" ]]; then
-         sed -i '' "s/example.com/$DOMAIN/g" /opt/appdata/authelia/configuration.yml
-         sed -i '' "s/example.com/$DOMAIN/g" /opt/appdata/compose/docker-compose.yml
-         sed -i '' "s/example.com/$DOMAIN/g" /opt/appdata/traefik/rules/middlewares.toml
+         sed -i '' "s/example.com/$DOMAIN/g" $basefolder/authelia/configuration.yml
+         sed -i '' "s/example.com/$DOMAIN/g" $basefolder/compose/docker-compose.yml
+         sed -i '' "s/example.com/$DOMAIN/g" $basefolder/traefik/rules/middlewares.toml
+         echo -e "DOMAIN=${DOMAIN}" >> $basefolder/compose/.env
       else
-         sed -i "s/example.com/$DOMAIN/g" /opt/appdata/authelia/configuration.yml
-         sed -i "s/example.com/$DOMAIN/g" /opt/appdata/compose/docker-compose.yml
-         sed -i "s/example.com/$DOMAIN/g" /opt/appdata/traefik/rules/middlewares.toml
+         sed -i "s/example.com/$DOMAIN/g" $basefolder/authelia/configuration.yml
+         sed -i "s/example.com/$DOMAIN/g" $basefolder/compose/docker-compose.yml
+         sed -i "s/example.com/$DOMAIN/g" $basefolder/traefik/rules/middlewares.toml
+         sed -i "s/example.com/$DOMAIN/g" $basefolder/compose/.env
      fi
    fi
 fi
@@ -221,11 +224,11 @@ EOF
 
 if [[ $DISPLAYNAME != "" ]]; then
    if [[ $(uname) == "Darwin" ]]; then
-      sed -i '' "s/<DISPLAYNAME>/$DISPLAYNAME/g" /opt/appdata/authelia/users_database.yml
-      sed -i '' "s/<USERNAME>/$DISPLAYNAME/g" /opt/appdata/authelia/users_database.yml
+      sed -i '' "s/<DISPLAYNAME>/$DISPLAYNAME/g" $basefolder/authelia/users_database.yml
+      sed -i '' "s/<USERNAME>/$DISPLAYNAME/g" $basefolder/authelia/users_database.yml
    else
-      sed -i "s/<DISPLAYNAME>/$DISPLAYNAME/g" /opt/appdata/authelia/users_database.yml
-      sed -i "s/<USERNAME>/$DISPLAYNAME/g" /opt/appdata/authelia/users_database.yml
+      sed -i "s/<DISPLAYNAME>/$DISPLAYNAME/g" $basefolder/authelia/users_database.yml
+      sed -i "s/<USERNAME>/$DISPLAYNAME/g" $basefolder/authelia/users_database.yml
    fi
 else
   echo "Display name cannot be empty"
@@ -250,13 +253,13 @@ if [[ $PASSWORD != "" ]]; then
    JWTTOKEN=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
    SECTOKEN=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
    if [[ $(uname) == "Darwin" ]]; then
-      sed -i '' "s/<PASSWORD>/$(echo $PASSWORD | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/users_database.yml
-      sed -i '' "s/JWTTOKENID/$(echo $JWTTOKEN | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
-      sed -i '' "s/SECTOKEN/unsecure_session_secret | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
+      sed -i '' "s/<PASSWORD>/$(echo $PASSWORD | sed -e 's/[\/&]/\\&/g')/g" $basefolder/authelia/users_database.yml
+      sed -i '' "s/JWTTOKENID/$(echo $JWTTOKEN | sed -e 's/[\/&]/\\&/g')/g" $basefolder/authelia/configuration.yml
+      sed -i '' "s/SECTOKEN/unsecure_session_secret | sed -e 's/[\/&]/\\&/g')/g" $basefolder/authelia/configuration.yml
    else
-      sed -i "s/<PASSWORD>/$(echo $PASSWORD | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/users_database.yml
-      sed -i "s/JWTTOKENID/$(echo $JWTTOKEN | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
-      sed -i "s/SECTOKEN/unsecure_session_secret | sed -e 's/[\/&]/\\&/g')/g" /opt/appdata/authelia/configuration.yml
+      sed -i "s/<PASSWORD>/$(echo $PASSWORD | sed -e 's/[\/&]/\\&/g')/g" $basefolder/authelia/users_database.yml
+      sed -i "s/JWTTOKENID/$(echo $JWTTOKEN | sed -e 's/[\/&]/\\&/g')/g" $basefolder/authelia/configuration.yml
+      sed -i "s/SECTOKEN/unsecure_session_secret | sed -e 's/[\/&]/\\&/g')/g" $basefolder/authelia/configuration.yml
    fi
 else
   echo "Password cannot be empty"
@@ -276,11 +279,11 @@ EOF
 
 if [[ $EMAIL != "" ]]; then
    if [[ $(uname) == "Darwin" ]]; then
-      sed -i '' "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/authelia/{configuration.yml,users_database.yml}
-      sed -i '' "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/compose/docker-compose.yml
+      sed -i '' "s/example-CF-EMAIL/$EMAIL/g" $basefolder/authelia/{configuration.yml,users_database.yml}
+      sed -i '' "s/example-CF-EMAIL/$EMAIL/g" $basefolder/compose/docker-compose.yml
    else
-      sed -i "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/authelia/{configuration.yml,users_database.yml}
-      sed -i "s/example-CF-EMAIL/$EMAIL/g" /opt/appdata/compose/docker-compose.yml
+      sed -i "s/example-CF-EMAIL/$EMAIL/g" $basefolder/authelia/{configuration.yml,users_database.yml}
+      sed -i "s/example-CF-EMAIL/$EMAIL/g" $basefolder/compose/docker-compose.yml
    fi
 else
   echo "CloudFlare-Email-Address cannot be empty"
@@ -300,11 +303,11 @@ EOF
 
 if [[ $CFGLOBAL != "" ]]; then
    if [[ $(uname) == "Darwin" ]]; then
-      sed -i '' "s/example-CF-API-KEY/$CFGLOBAL/g" /opt/appdata/authelia/configuration.yml
-      sed -i '' "s/example-CF-API-KEY/$CFGLOBAL/g" /opt/appdata/compose/docker-compose.yml
+      sed -i '' "s/example-CF-API-KEY/$CFGLOBAL/g" $basefolder/authelia/configuration.yml
+      sed -i '' "s/example-CF-API-KEY/$CFGLOBAL/g" $basefolder/compose/docker-compose.yml
    else
-      sed -i "s/example-CF-API-KEY/$CFGLOBAL/g" /opt/appdata/authelia/configuration.yml
-      sed -i "s/example-CF-API-KEY/$CFGLOBAL/g" /opt/appdata/compose/docker-compose.yml
+      sed -i "s/example-CF-API-KEY/$CFGLOBAL/g" $basefolder/authelia/configuration.yml
+      sed -i "s/example-CF-API-KEY/$CFGLOBAL/g" $basefolder/compose/docker-compose.yml
    fi
 else
   echo "CloudFlare-Global-Key cannot be empty"
@@ -324,9 +327,9 @@ EOF
 
 if [[ $CFZONEID != "" ]]; then
    if [[ $(uname) == "Darwin" ]]; then
-      sed -i '' "s/example-CF-ZONE_ID/$CFZONEID/g" /opt/appdata/compose/docker-compose.yml
+      sed -i '' "s/example-CF-ZONE_ID/$CFZONEID/g" $basefolder/compose/docker-compose.yml
    else
-      sed -i "s/example-CF-ZONE_ID/$CFZONEID/g" /opt/appdata/compose/docker-compose.yml
+      sed -i "s/example-CF-ZONE_ID/$CFZONEID/g" $basefolder/compose/docker-compose.yml
    fi
 else
   echo "CloudFlare-Zone-ID cannot be empty"
@@ -334,7 +337,6 @@ else
 fi
 interface
 }
-
 
 jounanctlpatch() {
 CTPATCH=$(cat /etc/systemd/journald.conf | grep "#PATCH" && echo true || echo false)
@@ -358,9 +360,11 @@ serverip() {
 SERVERIP=$(ip addr show |grep 'inet '|grep -v 127.0.0.1 |awk '{print $2}'| cut -d/ -f1 | head -n1)
 if [[ $SERVERIP != "" ]]; then
    if [[ $(uname) == "Darwin" ]]; then
-      sed -i '' "s/SERVERIP_ID/$SERVERIP/g" /opt/appdata/authelia/configuration.yml
+      sed -i '' "s/SERVERIP_ID/$SERVERIP/g" $basefolder/authelia/configuration.yml
+      sed -i '' "s/SERVERIP_ID/$SERVERIP/g" $basefolder/compose/.env
    else
-      sed -i "s/SERVERIP_ID/$SERVERIP/g" /opt/appdata/authelia/configuration.yml
+      sed -i "s/SERVERIP_ID/$SERVERIP/g" $basefolder/authelia/configuration.yml
+      sed -i "s/SERVERIP_ID/$SERVERIP/g" $basefolder/compose/.env
    fi
 else
   echo "Server-IP cannot be empty"
@@ -378,15 +382,29 @@ else
    docker image prune -af 1>/dev/null 2>&1
 fi
 }
-
+timezone() {
+TZTEST=$(command -v timedatectl && echo true || echo false)
+TZONE=$(timedatectl | grep "Time zone:" | awk '{print $3}')
+if [[ $TZTEST != "false" ]]; then
+   if [[ $TZONE != "" ]]; then
+      if [[ -f $basefolder/compose/.env ]];then sed -i '/TZ=/d' $basefolder/compose/.env;fi
+      TZ=$TZONE && echo -e "TZ=${TZ}" >> $basefolder/compose/.env
+   fi
+fi
+}
+##############
 deploynow() {
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
+env0=$basefolder/compose/.env
+if [[ ! -f $env0 ]]; then
+echo -e "ID=1000" >> $basefolder/compose/.env
+fi
 jounanctlpatch
 serverip
 ccontainer
 
-cd /opt/appdata/compose && $(command -v docker-compose) up -d --force-recreate 1>/dev/null 2>&1 && sleep 5
+cd $basefolder/compose && $(command -v docker-compose) up -d --force-recreate 1>/dev/null 2>&1 && sleep 5
 while true; do
   container="authelia traefik traefik-error-pages"
   for i in ${container}; do
