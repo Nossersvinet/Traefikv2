@@ -4,7 +4,7 @@ services:
   traefik:
     container_name: traefik
     image: traefik:latest
-    restart: unless-stopped
+    restart: 'unless-stopped'
     command:
       - --global.checkNewVersion=true
       - --global.sendAnonymousUsage=false
@@ -42,7 +42,7 @@ services:
     networks:
       - proxy
     security_opt:
-      - no-new-privileges:true
+      - 'no-new-privileges:true'
     ports:
       - target: 80
         published: 80
@@ -64,9 +64,9 @@ services:
     environment:
       - 'PGID=1000'
       - 'PUID=1000'
-      - TZ=UTC
-      - CLOUDFLARE_EMAIL=example-CF-EMAIL
-      - CLOUDFLARE_API_KEY=example-CF-API-KEY
+      - 'TZ=UTC'
+      - 'CLOUDFLARE_EMAIL=example-CF-EMAIL'
+      - 'CLOUDFLARE_API_KEY=example-CF-API-KEY'
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.routers.http-catchall.entrypoints=http'
@@ -107,13 +107,13 @@ services:
   traefik-error-pages:
     container_name: traefik-error-pages
     image: guillaumebriday/traefik-custom-error-pages
-    restart: unless-stopped
+    restart: 'unless-stopped'
     networks:
       - proxy
     environment:
       - 'PGID=1000'
       - 'PUID=1000'
-      - TZ=UTC
+      - 'TZ=UTC'
     labels:
       - 'traefik.enable=true'
       - 'traefik.docker.network=proxy'
@@ -142,7 +142,7 @@ services:
     environment:
       - 'PGID=1000'
       - 'PUID=1000'
-      - TZ=UTC
+      - 'TZ=UTC'
     labels:
       - 'traefik.enable=true'
       - 'traefik.docker.network=proxy'
@@ -152,11 +152,10 @@ services:
       - 'traefik.http.routers.authelia-rtr.service=authelia-svc'
       - 'traefik.http.services.authelia-svc.loadbalancer.server.port=9091'
 
-
   portainer:
     container_name: portainer
     image: portainer/portainer-ce:latest
-    restart: unless-stopped
+    restart: 'unless-stopped'
     depends_on:
       - traefik
       - authelia
@@ -170,7 +169,7 @@ services:
     environment:
       - 'PGID=1000'
       - 'PUID=1000'
-      - TZ=UTC
+      - 'TZ=UTC'
     labels:
       - 'traefik.enable=true'
       - 'traefik.docker.network=proxy'
@@ -179,7 +178,7 @@ services:
       - 'traefik.http.services.frontend.loadbalancer.server.port=9000'
       - 'traefik.http.routers.frontend.service=frontend'
       - 'traefik.http.routers.frontend.tls.certresolver=dns-cloudflare'
-    restart: unless-stopped
+    restart: 'unless-stopped'
 
 networks:
   proxy:
