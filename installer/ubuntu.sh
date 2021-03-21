@@ -76,7 +76,10 @@ while true; do
   dockertest=$($(command -v systemctl) is-active docker | grep -qE 'active' && echo true || echo false)
   if [[ $dockertest != "false" ]]; then $(command -v systemctl) reload-or-restart docker.service >/dev/null 2>1 && $(command -v systemctl) enable docker.service >/dev/null 2>&1; fi
   mntcheck=$(docker volume ls | grep -qE 'unionfs' && echo true || echo false)
-  if [[ $mntcheck == "false" ]]; then bash /opt/traefik/templates/local/install.sh >/dev/null 2>&1 >/dev/null 2>&1; fi
+  if [[ $mntcheck == "false" ]]; then
+     curl -fsSL https://raw.githubusercontent.com/MatchbookLab/local-persist/master/scripts/install.sh | sudo bash
+     docker volume create -d local-persist -o mountpoint=/mnt --name=unionfs
+  fi
   networkcheck=$(docker network ls | grep -qE 'proxy' && echo true || echo false)
   if [[ $networkcheck == "false" ]]; then docker network create --driver=bridge proxy >/dev/null 2>1; fi
   if [[ ! -x $(command -v docker-compose) ]]; then
