@@ -22,6 +22,7 @@ while true; do
   oldsinstall && proxydel
   package_list="update upgrade dist-upgrade autoremove autoclean"
   for i in ${package_list}; do
+      echo "running now $i"
       $(command -v apt) $i -yqq 1>/dev/null 2>&1
   done
   if [[ ! -d "/mnt/downloads" && ! -d "/mnt/unionfs" ]]; then
@@ -49,15 +50,17 @@ while true; do
   fi
   if [[ ! -x $(command -v docker)  ]]; then
      if [[ -r /etc/os-release ]]; then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
-        package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common language-pack-en-base lshw"
-        package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common language-pack-en-base lshw"
+        package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common language-pack-en-base lshw nano"
+        package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common language-pack-en-base lshw nano"
      if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]]; then
         for i in ${package_listubuntu}; do
+            echo "install now $i"
             $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1
             sleep 1
         done
      else
         for i in ${package_listdebian}; do
+            echo "install now $i"
             $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1
             sleep 1
         done
@@ -96,12 +99,12 @@ while true; do
         package_list="ansible dialog python3-lxml"
         package_listdebian="apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367"
         package_listubuntu="apt-add-repository --yes --update ppa:ansible/ansible"
-        if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]]; then ${package_listubuntu} >/dev/null 2>1; else ${package_listdebian} >/dev/null 2>1;fi
+        if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]]; then ${package_listubuntu} 1>/dev/null 2>&1; else ${package_listdebian} >/dev/null 2>1;fi
         for i in ${package_list}; do
-            $(command -v apt) install $i --reinstall -yqq >/dev/null 2>1
+            $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1
         done
   fi
-  if [[ ! -x $(command -v fail2ban-client) ]]; then $(command -v apt) install fail2ban -yqq >/dev/null 2>&1; fi
+  if [[ ! -x $(command -v fail2ban-client) ]]; then $(command -v apt) install fail2ban -yqq 1>/dev/null 2>&1; fi
       while true; do
           f2ban=$($(command -v systemctl) is-active fail2ban | grep -qE 'active' && echo true || echo false)
           if [[ $f2ban != 'true' ]];then
@@ -133,12 +136,12 @@ chain = DOCKER-USER">> /etc/fail2ban/jail.local
   fi
   f2ban=$($(command -v systemctl) is-active fail2ban | grep -qE 'active' && echo true || echo false)
   if [[ $f2ban != "false" ]]; then
-     $(command -v systemctl) reload-or-restart fail2ban.service >/dev/null 2>&1
-     $(command -v systemctl) enable fail2ban.service >/dev/null 2>&1
+     $(command -v systemctl) reload-or-restart fail2ban.service 1>/dev/null 2>&1
+     $(command -v systemctl) enable fail2ban.service 1>/dev/null 2>&1
   fi
-  if [[ ! -x $(command -v rsync) ]]; then $(command -v apt) install rsync -yqq >/dev/null 2>&1; fi
+  if [[ ! -x $(command -v rsync) ]]; then $(command -v apt) install rsync -yqq 1>/dev/null 2>&1; fi
   $(command -v rsync) /opt/traefik/templates/ $basefolder/ -aq --info=progress2 -hv --exclude={'local','installer'}
-  if [[ -x $(command -v rsync) ]]; then $(command -v apt) purge rsync -yqq  >/dev/null 2>&1; fi
+  if [[ -x $(command -v rsync) ]]; then $(command -v apt) purge rsync -yqq 1>/dev/null 2>&1; fi
   for i in ${basefolder}; do
       $(command -v mkdir) -p $i/{authelia,traefik,compose,portainer} \
                $i/traefik/{rules,acme}
@@ -178,10 +181,10 @@ sorry you need a clean server we cant update on top on $i\033[0m\n"
 proxydel() {
 delproxy="apache2 nginx"
 for i in ${delproxy}; do
-    $(command -v systemctl) stop $i >/dev/null 2>&1
-    $(command -v systemctl) disable $i >/dev/null 2>&1
-    $(command -v apt) remove $i -yqq >/dev/null 2>&1
-    $(command -v apt) purge $i -yqq >/dev/null 2>&1
+    $(command -v systemctl) stop $i 1>/dev/null 2>&1
+    $(command -v systemctl) disable $i 1>/dev/null 2>&1
+    $(command -v apt) remove $i -yqq 1>/dev/null 2>&1
+    $(command -v apt) purge $i -yqq 1>/dev/null 2>&1
 done
 }
 ########## FUNCTIONS START
