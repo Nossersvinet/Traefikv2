@@ -35,7 +35,7 @@ while true; do
      done
   fi
   config="/etc/sysctl.d/99-sysctl.conf"
-  ipv6=$(cat $config | grep -qE 'disable_ipv6' && echo true || false)
+  ipv6=$(cat $config | grep -qE 'ipv6' && echo true || false)
   if [ -f $config ]; then
      if [ $ipv6 != 'true' ] || [ $ipv6 == 'true' ]; then
        grep -qE 'net.ipv6.conf.all.disable_ipv6 = 1' $config || \
