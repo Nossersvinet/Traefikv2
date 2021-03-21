@@ -390,7 +390,7 @@ for i in ${container}; do
    docker stop $i 1>/dev/null 2>&1
    docker rm $i 1>/dev/null 2>&1
    docker image prune -af 1>/dev/null 2>&1
-do
+done
 }
 timezone() {
 TZTEST=$(command -v timedatectl && echo true || echo false)
