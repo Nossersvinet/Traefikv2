@@ -48,7 +48,7 @@ while true; do
      if [[ -r /etc/os-release ]]; then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
         package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common language-pack-en-base"
         package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common language-pack-en-base"
-     if [[ $lsb_dist == 'ubuntu' ]]; then
+     if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]]; then
         for i in ${package_listubuntu}; do
             $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1
             sleep 1
@@ -93,7 +93,7 @@ while true; do
         package_list="ansible dialog python3-lxml"
         package_listdebian="apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367"
         package_listubuntu="apt-add-repository --yes --update ppa:ansible/ansible"
-        if [[ $lsb_dist == 'ubuntu' ]]; then ${package_listubuntu} >/dev/null 2>1; else ${package_listdebian} >/dev/null 2>1;fi
+        if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]]; then ${package_listubuntu} >/dev/null 2>1; else ${package_listdebian} >/dev/null 2>1;fi
         for i in ${package_list}; do
             $(command -v apt) install $i --reinstall -yqq >/dev/null 2>1
         done
