@@ -61,7 +61,7 @@ session:
   name: authelia_session
   secret: unsecure_session_secret
   expiration: 1h
-  inactivity: 5m
+  inactivity: 10m
   remember_me_duration: 1M  
   domain: example.com
 
