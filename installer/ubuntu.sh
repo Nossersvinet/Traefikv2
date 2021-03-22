@@ -25,7 +25,7 @@ while true; do
       echo "running now $i"
       $(command -v apt) $i -yqq 1>/dev/null 2>&1
   done
-  if [[ ! -d "/mnt/downloads" && ! -d "/mnt/unionfs" ]]; then
+  if [[ ! -d "/mnt/downloads" && ! -d "/mnt/unionfs" ]];then
      basefolder="/mnt"
      for i in ${basefolder}; do
          $(command -v mkdir) -p $i/{unionfs,downloads,incomplete,torrent,nzb} \
@@ -37,7 +37,7 @@ while true; do
   fi
   config="/etc/sysctl.d/99-sysctl.conf"
   ipv6=$(cat $config | grep -qE 'ipv6' && echo true || false)
-  if [ -f $config ]; then
+  if [[ -f $config ]];then
      if [ $ipv6 != 'true' ] || [ $ipv6 == 'true' ];then
        grep -qE 'net.ipv6.conf.all.disable_ipv6 = 1' $config || \
             echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> $config
@@ -46,7 +46,7 @@ while true; do
        grep -qE 'net.ipv6.conf.lo.disable_ipv6 = 1' $config || \
             echo 'net.ipv6.conf.lo.disable_ipv6 = 1' >> $config
        sysctl -p -q
-    fi
+     fi
   fi
   if [[ ! -x $(command -v docker) ]];then
      if [[ -r /etc/os-release ]]; then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
@@ -71,34 +71,34 @@ while true; do
      cp /opt/traefik/templates/local/daemon.j2 /etc/docker/daemon.json
      $(command -v curl) --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
   fi
-  dockergroup=$(grep -qE docker /etc/group && echo true || echo false)
-  if [[ $dockergroup == "false" ]]; then usermod -aG docker $(whoami);fi
-  dockertest=$($(command -v systemctl) is-active docker | grep -qE 'active' && echo true || echo false)
-  if [[ $dockertest != "false" ]]; then $(command -v systemctl) reload-or-restart docker.service >/dev/null 2>1 && $(command -v systemctl) enable docker.service >/dev/null 2>&1; fi
-  mntcheck=$($(command -v docker) volume ls | grep -qE 'unionfs' && echo true || echo false)
-  if [[ $mntcheck == "false" ]]; then
-     curl --silent -fsSL https://raw.githubusercontent.com/MatchbookLab/local-persist/master/scripts/install.sh | sudo bash
+     dockergroup=$(grep -qE docker /etc/group && echo true || echo false)
+  if [[ $dockergroup == "false" ]];then usermod -aG docker $(whoami);fi
+     dockertest=$($(command -v systemctl) is-active docker | grep -qE 'active' && echo true || echo false)
+  if [[ $dockertest != "false" ]];then $(command -v systemctl) reload-or-restart docker.service >/dev/null 2>1 && $(command -v systemctl) enable docker.service >/dev/null 2>&1; fi
+     mntcheck=$($(command -v docker) volume ls | grep -qE 'unionfs' && echo true || echo false)
+  if [[ $mntcheck == "false" ]];then
+     $(command -v curl) --silent -fsSL https://raw.githubusercontent.com/MatchbookLab/local-persist/master/scripts/install.sh | sudo bash
      $(command -v docker) volume create -d local-persist -o mountpoint=/mnt --name=unionfs
   fi
-  networkcheck=$($(command -v docker) network ls | grep -qE 'proxy' && echo true || echo false)
+     networkcheck=$($(command -v docker) network ls | grep -qE 'proxy' && echo true || echo false)
   if [[ $networkcheck == "false" ]];then $(command -v docker) network create --driver=bridge proxy >/dev/null 2>1; fi
-  if [[ ! -x $(command -v docker-compose) ]]; then
+  if [[ ! -x $(command -v docker-compose) ]];then
      COMPOSE_VERSION=$($(command -v curl) --silent -fsSL https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
      sh -c "curl --silent -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose"
      sh -c "curl --silent -L https://raw.githubusercontent.com/docker/compose/${COMPOSE_VERSION}/contrib/completion/bash/docker-compose > /etc/bash_completion.d/docker-compose"
-     if [[ ! -L "/usr/bin/docker-compose" ]]; then rm -f /usr/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose; fi
+     if [[ ! -L "/usr/bin/docker-compose" ]];then $(command -v rm) -f /usr/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose;fi
      $(command -v chmod) a=rx,u+w /usr/local/bin/docker-compose >/dev/null 2>&1
      $(command -v chmod) a=rx,u+w /usr/bin/docker-compose >/dev/null 2>&1
   fi
   if [[ -x $(command -v lshw) ]];then
-      gpu="i915 nvidia"
-      for i in ${gpu}; do
-          TDV=$($(command -v lshw) -C video | grep -qE $i && echo true || echo false)
-          if [[ $TDV == "true" ]]; then $(command -v bash) ./templates/local/gpu.sh;fi
-      done
+     gpu="i915 nvidia"
+     for i in ${gpu}; do
+         TDV=$($(command -v lshw) -C video | grep -qE $i && echo true || echo false)
+         if [[ $TDV == "true" ]];then $(command -v bash) ./templates/local/gpu.sh;fi
+     done
   fi
   if [[ ! -x $(command -v ansible) ]];then
-     if [[ -r /etc/os-release ]]; then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
+     if [[ -r /etc/os-release ]];then lsb_dist="$(. /etc/os-release && echo "$ID")";fi
         package_list="ansible dialog python3-lxml"
         package_listdebian="apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367"
         package_listubuntu="apt-add-repository --yes --update ppa:ansible/ansible"
@@ -108,19 +108,19 @@ while true; do
         done
   fi
   if [[ ! -x $(command -v fail2ban-client) ]]; then $(command -v apt) install fail2ban -yqq 1>/dev/null 2>&1; fi
-      while true; do
-          f2ban=$($(command -v systemctl) is-active fail2ban | grep -qE 'active' && echo true || echo false)
-          if [[ $f2ban != 'true' ]];then
-              echo "Waiting for running fail2ban" && sleep 1 && continue
-          else
-              break
-          fi
-      done
-      ORGFILE="/etc/fail2ban/jail.conf"
-      LOCALMOD="/etc/fail2ban/jail.local"
-  if [[ ! -f $LOCALMOD ]]; then cp $ORGFILE $LOCALMOD; fi
-      MOD=$(cat $LOCALMOD | grep -qE '\[authelia\]' && echo true || echo false)
-  if [[ $MOD == "false" ]]; then
+     while true; do
+         f2ban=$($(command -v systemctl) is-active fail2ban | grep -qE 'active' && echo true || echo false)
+         if [[ $f2ban != 'true' ]];then
+            echo "Waiting for running fail2ban" && sleep 1 && continue
+         else
+            break
+         fi
+     done
+     ORGFILE="/etc/fail2ban/jail.conf"
+     LOCALMOD="/etc/fail2ban/jail.local"
+  if [[ ! -f $LOCALMOD ]];then cp $ORGFILE $LOCALMOD; fi
+     MOD=$(cat $LOCALMOD | grep -qE '\[authelia\]' && echo true || echo false)
+  if [[ $MOD == "false" ]];then
      echo "\
 
 [authelia]
@@ -138,13 +138,13 @@ chain = DOCKER-USER">> /etc/fail2ban/jail.local
   sed -i "s#weekly#daily#g" /etc/logrotate.conf
   fi
   f2ban=$($(command -v systemctl) is-active fail2ban | grep -qE 'active' && echo true || echo false)
-  if [[ $f2ban != "false" ]]; then
+  if [[ $f2ban != "false" ]];then
      $(command -v systemctl) reload-or-restart fail2ban.service 1>/dev/null 2>&1
      $(command -v systemctl) enable fail2ban.service 1>/dev/null 2>&1
   fi
-  if [[ ! -x $(command -v rsync) ]]; then $(command -v apt) install rsync -yqq 1>/dev/null 2>&1; fi
-  $(command -v rsync) /opt/traefik/templates/ $basefolder/ -aq --info=progress2 -hv --exclude={'local','installer'}
-  if [[ -x $(command -v rsync) ]]; then $(command -v apt) purge rsync -yqq 1>/dev/null 2>&1; fi
+  if [[ ! -x $(command -v rsync) ]];then $(command -v apt) install rsync -yqq 1>/dev/null 2>&1; fi
+     $(command -v rsync) /opt/traefik/templates/ $basefolder/ -aq --info=progress2 -hv --exclude={'local','installer'}
+  if [[ -x $(command -v rsync) ]];then $(command -v apt) purge rsync -yqq 1>/dev/null 2>&1; fi
   for i in ${basefolder}; do
       $(command -v mkdir) -p $i/{authelia,traefik,compose,portainer} \
                $i/traefik/{rules,acme}
@@ -199,7 +199,7 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-   read -ep "What root domain would you like to protect?: " DOMAIN
+   read -erp "What root domain would you like to protect?: " DOMAIN
 
 if [[ $DOMAIN == "" ]]; then
    echo "Domain cannot be empty"
@@ -222,7 +222,7 @@ else
          sed -i "s/example.com/$DOMAIN/g" $basefolder/compose/docker-compose.yml
          sed -i "s/example.com/$DOMAIN/g" $basefolder/traefik/rules/middlewares.toml
          sed -i "s/example.com/$DOMAIN/g" $basefolder/compose/.env
-     fi
+      fi
    fi
 fi
 interface
@@ -235,7 +235,7 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-   read -ep "Enter your display name for Authelia (eg. John Doe): " DISPLAYNAME
+   read -erp "Enter your display name for Authelia (eg. John Doe): " DISPLAYNAME
 
 if [[ $DISPLAYNAME != "" ]]; then
    if [[ $(uname) == "Darwin" ]]; then
@@ -260,7 +260,7 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-   read -esp "Enter a password for $USERNAME: " PASSWORD
+   read -erp "Enter a password for $USERNAME: " PASSWORD
 
 if [[ $PASSWORD != "" ]]; then
    $(command -v docker) pull authelia/authelia -q > /dev/null
@@ -277,8 +277,8 @@ if [[ $PASSWORD != "" ]]; then
       sed -i "s/SECTOKEN/unsecure_session_secret | sed -e 's/[\/&]/\\&/g')/g" $basefolder/authelia/configuration.yml
    fi
 else
-  echo "Password cannot be empty"
-  password
+   echo "Password cannot be empty"
+   password
 fi
 interface
 }
@@ -290,7 +290,7 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-   read -ep "Whats your CloudFlare-Email-Address : " EMAIL
+   read -erp "Whats your CloudFlare-Email-Address : " EMAIL
 
 if [[ $EMAIL != "" ]]; then
    if [[ $(uname) == "Darwin" ]]; then
@@ -314,7 +314,7 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-   read -ep "Whats your CloudFlare-Global-Key: " CFGLOBAL
+   read -erp "Whats your CloudFlare-Global-Key: " CFGLOBAL
 
 if [[ $CFGLOBAL != "" ]]; then
    if [[ $(uname) == "Darwin" ]]; then
@@ -325,8 +325,8 @@ if [[ $CFGLOBAL != "" ]]; then
       sed -i "s/example-CF-API-KEY/$CFGLOBAL/g" $basefolder/compose/docker-compose.yml
    fi
 else
-  echo "CloudFlare-Global-Key cannot be empty"
-  cfkey
+   echo "CloudFlare-Global-Key cannot be empty"
+   cfkey
 fi
 interface
 }
@@ -338,7 +338,7 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-   read -ep "Whats your CloudFlare-Zone-ID: " CFZONEID
+   read -erp "Whats your CloudFlare-Zone-ID: " CFZONEID
 
 if [[ $CFZONEID != "" ]]; then
    if [[ $(uname) == "Darwin" ]]; then
@@ -347,8 +347,8 @@ if [[ $CFZONEID != "" ]]; then
       sed -i "s/example-CF-ZONE_ID/$CFZONEID/g" $basefolder/compose/docker-compose.yml
    fi
 else
-  echo "CloudFlare-Zone-ID cannot be empty"
-  cfzoneid
+   echo "CloudFlare-Zone-ID cannot be empty"
+   cfzoneid
 fi
 interface
 }
@@ -382,17 +382,17 @@ if [[ $SERVERIP != "" ]]; then
       sed -i "s/SERVERIP_ID/$SERVERIP/g" $basefolder/compose/.env
    fi
 else
-  echo "Server-IP cannot be empty"
-  serverip
+   echo "Server-IP cannot be empty"
+   serverip
 fi
 }
 
 ccont() {
 container=$($(command -v docker) ps -aq --format '{{.Names}}' | grep -E 'trae|auth|error-pag')
 for i in ${container}; do
-   $(command -v docker) stop $i 1>/dev/null 2>&1
-   $(command -v docker) rm $i 1>/dev/null 2>&1
-   $(command -v docker) image prune -af 1>/dev/null 2>&1
+    $(command -v docker) stop $i 1>/dev/null 2>&1
+    $(command -v docker) rm $i 1>/dev/null 2>&1
+    $(command -v docker) image prune -af 1>/dev/null 2>&1
 done
 }
 timezone() {
@@ -490,19 +490,22 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-  read -p '↘️  Type Number | Press [ENTER]: ' typed </dev/tty
+  read -erp '↘️  Type Number | Press [ENTER]: ' typed </dev/tty
+
   case $typed in
-  1) domain && clear && interface ;;
-  2) displayname && clear && interface ;;
-  3) password && clear && interface ;;
-  4) cfemail && clear && interface ;;
-  5) cfkey && clear && interface ;;
-  6) cfzoneid && clear && interface ;;
-  d) deploynow && clear && interface ;;
-  D) deploynow && clear && interface ;;
-  z) exit 0 ;;
-  Z) exit 0 ;;
-  *) clear && interface ;;
+
+     1) domain && clear && interface ;;
+     2) displayname && clear && interface ;;
+     3) password && clear && interface ;;
+     4) cfemail && clear && interface ;;
+     5) cfkey && clear && interface ;;
+     6) cfzoneid && clear && interface ;;
+     d) deploynow && clear && interface ;;
+     D) deploynow && clear && interface ;;
+     z) exit 0 ;;
+     Z) exit 0 ;;
+     *) clear && interface ;;
+
   esac
 }
 # FUNCTIONS END ##############################################################
