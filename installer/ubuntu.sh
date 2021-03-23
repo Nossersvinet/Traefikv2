@@ -270,11 +270,11 @@ if [[ $PASSWORD != "" ]]; then
    if [[ $(uname) == "Darwin" ]]; then
       sed -i '' "s/<PASSWORD>/$(echo $PASSWORD | sed -e 's/[\/&]/\\&/g')/g" $basefolder/authelia/users_database.yml
       sed -i '' "s/JWTTOKENID/$(echo $JWTTOKEN | sed -e 's/[\/&]/\\&/g')/g" $basefolder/authelia/configuration.yml
-      sed -i '' "s/SECTOKEN/unsecure_session_secret | sed -e 's/[\/&]/\\&/g')/g" $basefolder/authelia/configuration.yml
+      sed -i '' "s/unsecure_session_secret/$(echo $SECTOKEN | sed -e 's/[\/&]/\\&/g')/g" $basefolder/authelia/configuration.yml
    else
       sed -i "s/<PASSWORD>/$(echo $PASSWORD | sed -e 's/[\/&]/\\&/g')/g" $basefolder/authelia/users_database.yml
       sed -i "s/JWTTOKENID/$(echo $JWTTOKEN | sed -e 's/[\/&]/\\&/g')/g" $basefolder/authelia/configuration.yml
-      sed -i "s/SECTOKEN/unsecure_session_secret | sed -e 's/[\/&]/\\&/g')/g" $basefolder/authelia/configuration.yml
+      sed -i "s/unsecure_session_secret/$(echo $SECTOKEN | sed -e 's/[\/&]/\\&/g')/g" $basefolder/authelia/configuration.yml
    fi
 else
    echo "Password cannot be empty"
