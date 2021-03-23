@@ -212,17 +212,11 @@ else
          sed -i '' "s/example.com/$DOMAIN/g" $basefolder/authelia/configuration.yml
          sed -i '' "s/example.com/$DOMAIN/g" $basefolder/compose/docker-compose.yml
          sed -i '' "s/example.com/$DOMAIN/g" $basefolder/traefik/rules/middlewares.toml
-         if [[ -f $basefolder/compose/.env ]];then sed -i '/DOMAIN=/d' $basefolder/compose/.env;fi 
-            grep -qE 'DOMAIN=${DOMAIN}' $basefolder/compose/.env || \
-                echo 'DOMAIN=${DOMAIN}' >> $basefolder/compose/.env
       else
          sed -i "s/example.com/$DOMAIN/g" $basefolder/authelia/configuration.yml
          sed -i "s/example.com/$DOMAIN/g" $basefolder/compose/docker-compose.yml
          sed -i "s/example.com/$DOMAIN/g" $basefolder/traefik/rules/middlewares.toml
          sed -i "s/example.com/$DOMAIN/g" $basefolder/compose/.env
-         if [[ -f $basefolder/compose/.env ]];then sed -i '/DOMAIN=/d' $basefolder/compose/.env;fi 
-            grep -qE 'DOMAIN=${DOMAIN}' $basefolder/compose/.env || \
-                echo 'DOMAIN=${DOMAIN}' >> $basefolder/compose/.env
       fi
    fi
 fi
