@@ -102,7 +102,7 @@ while true; do
         package_list="ansible dialog python3-lxml"
         package_listdebian="apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367"
         package_listubuntu="apt-add-repository --yes --update ppa:ansible/ansible"
-        if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]]; then ${package_listubuntu} 1>/dev/null 2>&1; else ${package_listdebian} >/dev/null 2>1;fi
+        if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]]; then ${package_listubuntu} 1>/dev/null 2>&1;else ${package_listdebian} >/dev/null 2>1;fi
         for i in ${package_list}; do
             $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1
         done
@@ -172,11 +172,7 @@ oldsinstall() {
 sorry you need a clean server we cant update on top on $i\033[0m\n"
              echo ""
              read -erp "Type confirm when you read the message: " input
-             if [[ "$input" = "confirm" ]];then
-                exit
-             else
-                oldsinstall
-             fi
+             if [[ "$input" = "confirm" ]];then exit ;else oldsinstall;fi
           fi
       done
   done
@@ -216,12 +212,17 @@ else
          sed -i '' "s/example.com/$DOMAIN/g" $basefolder/authelia/configuration.yml
          sed -i '' "s/example.com/$DOMAIN/g" $basefolder/compose/docker-compose.yml
          sed -i '' "s/example.com/$DOMAIN/g" $basefolder/traefik/rules/middlewares.toml
-         echo -e "DOMAIN=${DOMAIN}" >> $basefolder/compose/.env
+         if [[ -f $basefolder/compose/.env ]];then sed -i '/DOMAIN=/d' $basefolder/compose/.env;fi 
+            grep -qE 'DOMAIN=${DOMAIN}' $basefolder/compose/.env || \
+                echo 'DOMAIN=${DOMAIN}' >> $basefolder/compose/.env
       else
          sed -i "s/example.com/$DOMAIN/g" $basefolder/authelia/configuration.yml
          sed -i "s/example.com/$DOMAIN/g" $basefolder/compose/docker-compose.yml
          sed -i "s/example.com/$DOMAIN/g" $basefolder/traefik/rules/middlewares.toml
          sed -i "s/example.com/$DOMAIN/g" $basefolder/compose/.env
+         if [[ -f $basefolder/compose/.env ]];then sed -i '/DOMAIN=/d' $basefolder/compose/.env;fi 
+            grep -qE 'DOMAIN=${DOMAIN}' $basefolder/compose/.env || \
+                echo 'DOMAIN=${DOMAIN}' >> $basefolder/compose/.env
       fi
    fi
 fi
@@ -372,7 +373,7 @@ MaxLevelStore=crit" >>/etc/systemd/journald.conf
 fi
 }
 serverip() {
-SERVERIP=$(ip addr show |grep 'inet '|grep -v 127.0.0.1 |awk '{print $2}'| cut -d/ -f1 | head -n1)
+SERVERIP=$(curl -s http://whatismijnip.nl |cut -d " " -f 5)
 if [[ $SERVERIP != "" ]];then
    if [[ $(uname) == "Darwin" ]];then
       sed -i '' "s/SERVERIP_ID/$SERVERIP/g" $basefolder/authelia/configuration.yml
