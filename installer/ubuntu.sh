@@ -9,7 +9,7 @@
 #FUNCTIONS
 
 updatesystem() {
-if [[ $EUID -ne 0 ]]; then
+if [[ $EUID -ne 0 ]];then
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⛔  You Must Execute as a SUDO USER (with sudo) or as ROOT!
@@ -166,14 +166,14 @@ oldsinstall() {
       folders="/var/ /opt/ /home/"
       for ii in ${folders}; do
           show=$(find $ii -maxdepth 1 -type d -name $i -print)
-          if [[ $show != '' ]]; then
+          if [[ $show != '' ]];then
              echo ""
              printf "\033[0;31m You need to reinstall your Server 
 sorry you need a clean server we cant update on top on $i\033[0m\n"
              echo ""
-             read -p "Type confirm when you read the message: " input
-             if [[ "$input" = "confirm" ]]; then
-                 exit 0
+             read -erp "Type confirm when you read the message: " input
+             if [[ "$input" = "confirm" ]];then
+                exit
              else
                 oldsinstall
              fi
@@ -201,18 +201,18 @@ tee <<-EOF
 EOF
    read -erp "What root domain would you like to protect?: " DOMAIN
 
-if [[ $DOMAIN == "" ]]; then
+if [[ $DOMAIN == "" ]];then
    echo "Domain cannot be empty"
    domain
 else
    MODIFIED=$(cat /etc/hosts | grep $DOMAIN && echo true || echo false)
-   if [[ $MODIFIED == "false" ]]; then
+   if [[ $MODIFIED == "false" ]];then
    echo "\
 127.0.0.1  *.$DOMAIN
 127.0.0.1  $DOMAIN" >> /etc/hosts
    fi
-   if [[ $DOMAIN != "example.com" ]]; then
-      if [[ $(uname) == "Darwin" ]]; then
+   if [[ $DOMAIN != "example.com" ]];then
+      if [[ $(uname) == "Darwin" ]];then
          sed -i '' "s/example.com/$DOMAIN/g" $basefolder/authelia/configuration.yml
          sed -i '' "s/example.com/$DOMAIN/g" $basefolder/compose/docker-compose.yml
          sed -i '' "s/example.com/$DOMAIN/g" $basefolder/traefik/rules/middlewares.toml
@@ -237,8 +237,8 @@ tee <<-EOF
 EOF
    read -erp "Enter your display name for Authelia (eg. John Doe): " DISPLAYNAME
 
-if [[ $DISPLAYNAME != "" ]]; then
-   if [[ $(uname) == "Darwin" ]]; then
+if [[ $DISPLAYNAME != "" ]];then
+   if [[ $(uname) == "Darwin" ]];then
       sed -i '' "s/<DISPLAYNAME>/$DISPLAYNAME/g" $basefolder/authelia/users_database.yml
       sed -i '' "s/<USERNAME>/$DISPLAYNAME/g" $basefolder/authelia/users_database.yml
    else
@@ -262,12 +262,12 @@ tee <<-EOF
 EOF
    read -erp "Enter a password for $USERNAME: " PASSWORD
 
-if [[ $PASSWORD != "" ]]; then
+if [[ $PASSWORD != "" ]];then
    $(command -v docker) pull authelia/authelia -q > /dev/null
    PASSWORD=$($(command -v docker) run authelia/authelia authelia hash-password $PASSWORD -i 2 -k 32 -m 128 -p 8 -l 32 | sed 's/Password hash: //g')
    JWTTOKEN=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
    SECTOKEN=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-   if [[ $(uname) == "Darwin" ]]; then
+   if [[ $(uname) == "Darwin" ]];then
       sed -i '' "s/<PASSWORD>/$(echo $PASSWORD | sed -e 's/[\/&]/\\&/g')/g" $basefolder/authelia/users_database.yml
       sed -i '' "s/JWTTOKENID/$(echo $JWTTOKEN | sed -e 's/[\/&]/\\&/g')/g" $basefolder/authelia/configuration.yml
       sed -i '' "s/unsecure_session_secret/$(echo $SECTOKEN | sed -e 's/[\/&]/\\&/g')/g" $basefolder/authelia/configuration.yml
@@ -292,8 +292,8 @@ tee <<-EOF
 EOF
    read -erp "Whats your CloudFlare-Email-Address : " EMAIL
 
-if [[ $EMAIL != "" ]]; then
-   if [[ $(uname) == "Darwin" ]]; then
+if [[ $EMAIL != "" ]];then
+   if [[ $(uname) == "Darwin" ]];then
       sed -i '' "s/example-CF-EMAIL/$EMAIL/g" $basefolder/authelia/{configuration.yml,users_database.yml}
       sed -i '' "s/example-CF-EMAIL/$EMAIL/g" $basefolder/compose/docker-compose.yml
    else
@@ -316,7 +316,7 @@ tee <<-EOF
 EOF
    read -erp "Whats your CloudFlare-Global-Key: " CFGLOBAL
 
-if [[ $CFGLOBAL != "" ]]; then
+if [[ $CFGLOBAL != "" ]];then
    if [[ $(uname) == "Darwin" ]]; then
       sed -i '' "s/example-CF-API-KEY/$CFGLOBAL/g" $basefolder/authelia/configuration.yml
       sed -i '' "s/example-CF-API-KEY/$CFGLOBAL/g" $basefolder/compose/docker-compose.yml
@@ -340,8 +340,8 @@ tee <<-EOF
 EOF
    read -erp "Whats your CloudFlare-Zone-ID: " CFZONEID
 
-if [[ $CFZONEID != "" ]]; then
-   if [[ $(uname) == "Darwin" ]]; then
+if [[ $CFZONEID != "" ]];then
+   if [[ $(uname) == "Darwin" ]];then
       sed -i '' "s/example-CF-ZONE_ID/$CFZONEID/g" $basefolder/compose/docker-compose.yml
    else
       sed -i "s/example-CF-ZONE_ID/$CFZONEID/g" $basefolder/compose/docker-compose.yml
@@ -355,7 +355,7 @@ interface
 
 jounanctlpatch() {
 CTPATCH=$(cat /etc/systemd/journald.conf | grep "#PATCH" && echo true || echo false)
-if [[ $CTPATCH == "false" ]]; then
+if [[ $CTPATCH == "false" ]];then
    journalctl --flush 1>/dev/null 2>&1
    journalctl --rotate 1>/dev/null 2>&1
    journalctl --vacuum-time=1s 1>/dev/null 2>&1
@@ -373,8 +373,8 @@ fi
 }
 serverip() {
 SERVERIP=$(ip addr show |grep 'inet '|grep -v 127.0.0.1 |awk '{print $2}'| cut -d/ -f1 | head -n1)
-if [[ $SERVERIP != "" ]]; then
-   if [[ $(uname) == "Darwin" ]]; then
+if [[ $SERVERIP != "" ]];then
+   if [[ $(uname) == "Darwin" ]];then
       sed -i '' "s/SERVERIP_ID/$SERVERIP/g" $basefolder/authelia/configuration.yml
       sed -i '' "s/SERVERIP_ID/$SERVERIP/g" $basefolder/compose/.env
    else
@@ -398,8 +398,8 @@ done
 timezone() {
 TZTEST=$($(command -v timedatectl) && echo true || echo false)
 TZONE=$($(command -v timedatectl) | grep "Time zone:" | awk '{print $3}')
-if [[ $TZTEST != "false" ]]; then
-   if [[ $TZONE != "" ]]; then
+if [[ $TZTEST != "false" ]];then
+   if [[ $TZONE != "" ]];then
       if [[ -f $basefolder/compose/.env ]];then sed -i '/TZ=/d' $basefolder/compose/.env;fi
           TZ=$TZONE 
           #echo "TZ=${TZ}" >> $basefolder/compose/.env
@@ -417,7 +417,7 @@ docker image prune -af 1>/dev/null 2>&1
 }
 envcreate() {
 env0=$basefolder/compose/.env
-if [[ -f $env0 ]]; then
+if [[ -f $env0 ]];then
    grep -qE 'ID=1000' $basefolder/compose/.env || \
        echo 'ID=1000' >> $basefolder/compose/.env
 fi
@@ -437,7 +437,7 @@ cd $basefolder/compose && $(command -v docker-compose) up -d --force-recreate 1>
 while true; do
   container="authelia traefik traefik-error-pages"
   for i in ${container}; do
-      if [[ "$($(command -v docker) container inspect -f '{{.State.Status}}' $i )" == "running" ]]; then echo " --> Container $i is up and running <--" && sleep 2; fi
+      if [[ "$($(command -v docker) container inspect -f '{{.State.Status}}' $i )" == "running" ]];then echo " --> Container $i is up and running <--" && sleep 2;fi
   done
 break
 done
@@ -459,7 +459,7 @@ sleep 30
 while true; do
   container="authelia traefik traefik-error-pages"
   for i in ${container}; do
-      if [[ "$($(command -v docker) container inspect -f '{{.State.Status}}' $i )" != "running" ]]; then deploynow && sleep 2; fi
+      if [[ "$($(command -v docker) container inspect -f '{{.State.Status}}' $i )" != "running" ]];then deploynow && sleep 2;fi
   done
 break
 done
