@@ -405,7 +405,6 @@ if [[ $TZTEST != "false" ]]; then
           #echo "TZ=${TZ}" >> $basefolder/compose/.env
           grep -qE 'TZ=${TZ}' $basefolder/compose/.env || \
                echo 'TZ=${TZ}' >> $basefolder/compose/.env
-      fi
    fi
 fi
 }
