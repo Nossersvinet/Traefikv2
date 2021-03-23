@@ -165,7 +165,7 @@ services:
       - 'no-new-privileges:true'
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock:ro'
-      - '/opt/appdata/portainer:/data'
+      - portainer:/data
     environment:
       - 'PGID=1000'
       - 'PUID=1000'
@@ -179,6 +179,9 @@ services:
       - 'traefik.http.routers.frontend.service=frontend'
       - 'traefik.http.routers.frontend.tls.certresolver=dns-cloudflare'
     restart: 'unless-stopped'
+
+volumes:
+  portainer:
 
 networks:
   proxy:
