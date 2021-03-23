@@ -37,10 +37,6 @@ access_control:
     - domain: authelia.example.com
       policy: bypass
     ## bypass rule for apps
-    - domain: overseerr.example.com
-      policy: bypass
-    - domain: plex.example.com
-      policy: bypass
     ## bypass rules for api / trigges
     - domain: "*.example.com"
       policy: bypass
