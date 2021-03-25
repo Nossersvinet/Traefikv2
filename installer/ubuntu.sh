@@ -12,6 +12,7 @@
 # shellcheck disable=SC2012
 # shellcheck disable=SC2086
 # shellcheck disable=SC2196
+# shellcheck disable=SC2046
 #FUNCTIONS
 
 updatesystem() {
@@ -80,14 +81,14 @@ while true; do
      dockergroup=$(grep -qE docker /etc/group && echo true || echo false)
   if [[ $dockergroup == "false" ]];then usermod -aG docker $(whoami);fi
      dockertest=$($(command -v systemctl) is-active docker | grep -qE 'active' && echo true || echo false)
-  if [[ $dockertest != "false" ]];then $(command -v systemctl) reload-or-restart docker.service >/dev/null 2>1 && $(command -v systemctl) enable docker.service >/dev/null 2>&1; fi
+  if [[ $dockertest != "false" ]];then $(command -v systemctl) reload-or-restart docker.service 1>/dev/null 2>&1 && $(command -v systemctl) enable docker.service >/dev/null 2>&1; fi
      mntcheck=$($(command -v docker) volume ls | grep -qE 'unionfs' && echo true || echo false)
   if [[ $mntcheck == "false" ]];then
      $(command -v curl) --silent -fsSL https://raw.githubusercontent.com/MatchbookLab/local-persist/master/scripts/install.sh | sudo bash
      $(command -v docker) volume create -d local-persist -o mountpoint=/mnt --name=unionfs
   fi
      networkcheck=$($(command -v docker) network ls | grep -qE 'proxy' && echo true || echo false)
-  if [[ $networkcheck == "false" ]];then $(command -v docker) network create --driver=bridge proxy >/dev/null 2>1; fi
+  if [[ $networkcheck == "false" ]];then $(command -v docker) network create --driver=bridge proxy 1>/dev/null 2>&1; fi
   if [[ ! -x $(command -v docker-compose) ]];then
      COMPOSE_VERSION=$($(command -v curl) --silent -fsSL https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
      sh -c "curl --silent -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose"
@@ -412,9 +413,9 @@ fi
 cleanup() {
 listexited=$($(command -v docker) ps -aq --format '{{.State}}' | grep -E 'exited' | awk '{print $1}')
 for i in ${listexited}; do
-    docker rm $i 1>/dev/null 2>&1
+    $(command -v docker) rm $i 1>/dev/null 2>&1
 done
-docker image prune -af 1>/dev/null 2>&1
+$(command -v docker) image prune -af 1>/dev/null 2>&1
 }
 envcreate() {
 env0=$basefolder/compose/.env
