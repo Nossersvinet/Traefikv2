@@ -6,6 +6,12 @@
 # URL:        https://sudobox.io/
 # GNU:        General Public License v3.0
 ################################################################################
+# shellcheck disable=SC2003
+# shellcheck disable=SC2006
+# shellcheck disable=SC2207
+# shellcheck disable=SC2012
+# shellcheck disable=SC2086
+# shellcheck disable=SC2196
 #FUNCTIONS
 
 updatesystem() {
