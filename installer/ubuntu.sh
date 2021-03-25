@@ -434,35 +434,35 @@ cleanup
 jounanctlpatch
 serverip
 ccont
-
 cd $basefolder/compose && $(command -v docker-compose) up -d --force-recreate 1>/dev/null 2>&1 && sleep 5
 while true; do
   container="authelia traefik traefik-error-pages"
   for i in ${container}; do
-      runningcheck=$($(command -v docker) ps -aq --format '{{.Names}} {{.State}}' | grep -x '$i running' 1>/dev/null 2>&1 && echo true || echo false)
-      if [[ $runningcheck == "true" ]];then
+      if [[ "$($(command -v docker) container inspect -f '{{.State.Status}}' $i )" == "running" ]];then
          echo "--> Container $i is up and running <--"
-      else
-         deploynow
       fi
   done
   break
 done
 tee <<-EOF
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 Treafikv2 with Authelia
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
        Traefikv2 with Authelia is deployed
-
    Please Wait some minutes Authelia and Treafik 
      need some minutes to start all services
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 EOF
-sleep 30
+sleep 10
+while true; do
+  container="authelia traefik traefik-error-pages"
+  for i in ${container}; do
+      if [[ "$($(command -v docker) container inspect -f '{{.State.Status}}' $i )" != "running" ]];then
+         deploynow
+      fi
+  done
+break
+done
 interface
 }
 ######################################################
