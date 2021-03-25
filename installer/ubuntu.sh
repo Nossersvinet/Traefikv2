@@ -150,8 +150,9 @@ chain = DOCKER-USER">> /etc/fail2ban/jail.local
      $(command -v systemctl) enable fail2ban.service 1>/dev/null 2>&1
   fi
   if [[ ! -x $(command -v rsync) ]];then $(command -v apt) install rsync -yqq 1>/dev/null 2>&1; fi
-     $(command -v rsync) /opt/traefik/templates/ $basefolder/ -aq --info=progress2 -hv --exclude={'local','installer'}
+     $(command -v rsync) /opt/traefik/templates/ /opt/appdata/ -aq --info=progress2 -hv --exclude={'local','installer'}
   if [[ -x $(command -v rsync) ]];then $(command -v apt) purge rsync -yqq 1>/dev/null 2>&1; fi
+  basefolder="/opt/appdata"
   for i in ${basefolder}; do
       $(command -v mkdir) -p $i/{authelia,traefik,compose,portainer} \
                $i/traefik/{rules,acme}
@@ -195,6 +196,7 @@ done
 }
 ########## FUNCTIONS START
 domain() {
+basefolder="/opt/appdata"
 tee <<-EOF
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -230,6 +232,7 @@ fi
 interface
 }
 displayname() {
+basefolder="/opt/appdata"
 tee <<-EOF
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -255,6 +258,7 @@ interface
 }
 
 password() {
+basefolder="/opt/appdata"
 tee <<-EOF
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -285,6 +289,7 @@ fi
 interface
 }
 cfemail() {
+basefolder="/opt/appdata"
 tee <<-EOF
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -309,6 +314,7 @@ fi
 interface
 }
 cfkey() {
+basefolder="/opt/appdata"
 tee <<-EOF
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -333,6 +339,7 @@ fi
 interface
 }
 cfzoneid() {
+basefolder="/opt/appdata"
 tee <<-EOF
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -374,6 +381,7 @@ MaxLevelStore=crit" >>/etc/systemd/journald.conf
 fi
 }
 serverip() {
+basefolder="/opt/appdata"
 SERVERIP=$(curl -s http://whatismijnip.nl |cut -d " " -f 5)
 if [[ $SERVERIP != "" ]];then
    if [[ $(uname) == "Darwin" ]];then
@@ -418,6 +426,7 @@ done
 $(command -v docker) image prune -af 1>/dev/null 2>&1
 }
 envcreate() {
+basefolder="/opt/appdata"
 env0=$basefolder/compose/.env
 if [[ -f $env0 ]];then
    grep -qE 'ID=1000' $basefolder/compose/.env || \
@@ -426,6 +435,7 @@ fi
 }
 ##############
 deploynow() {
+basefolder="/opt/appdata"
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 envcreate
