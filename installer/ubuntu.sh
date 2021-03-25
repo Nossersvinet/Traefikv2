@@ -57,8 +57,8 @@ while true; do
   fi
   if [[ ! -x $(command -v docker) ]];then
      if [[ -r /etc/os-release ]]; then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
-        package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common language-pack-en-base lshw nano"
-        package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common language-pack-en-base lshw nano"
+        package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common language-pack-en-base lshw nano rsync"
+        package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common language-pack-en-base lshw nano rsync"
      if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]];then
         for i in ${package_listubuntu}; do
             echo "install now $i"
@@ -114,7 +114,7 @@ while true; do
             $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1
         done
   fi
-  if [[ ! -x $(command -v fail2ban-client) ]]; then $(command -v apt) install fail2ban -yqq 1>/dev/null 2>&1; fi
+  if [[ ! -x $(command -v fail2ban-client) ]];then $(command -v apt) install fail2ban -yqq 1>/dev/null 2>&1; fi
      while true; do
          f2ban=$($(command -v systemctl) is-active fail2ban | grep -qE 'active' && echo true || echo false)
          if [[ $f2ban != 'true' ]];then
@@ -149,9 +149,8 @@ chain = DOCKER-USER">> /etc/fail2ban/jail.local
      $(command -v systemctl) reload-or-restart fail2ban.service 1>/dev/null 2>&1
      $(command -v systemctl) enable fail2ban.service 1>/dev/null 2>&1
   fi
-  if [[ ! -x $(command -v rsync) ]];then $(command -v apt) install rsync -yqq 1>/dev/null 2>&1; fi
-     $(command -v rsync) /opt/traefik/templates/ /opt/appdata/ -aq --info=progress2 -hv --exclude={'local','installer'}
-  if [[ -x $(command -v rsync) ]];then $(command -v apt) purge rsync -yqq 1>/dev/null 2>&1; fi
+  if [[ ! -x $(command -v rsync) ]];then $(command -v apt) install --reinstall rsync -yqq 1>/dev/null 2>&1;fi
+  $(command -v rsync) /opt/traefik/templates/ /opt/appdata/ -aq --info=progress2 -hv --exclude={'local','installer'}
   basefolder="/opt/appdata"
   for i in ${basefolder}; do
       $(command -v mkdir) -p $i/{authelia,traefik,compose,portainer} \
