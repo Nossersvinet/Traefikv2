@@ -13,5 +13,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Run ShellCheck
       uses: ludeeus/action-shellcheck@master
+      env:
+        SHELLCHECK_OPTS: -e SC2002 -e SC2086 -e SC2046 -e SC1091 -e SC2059 -e SC2034 -e SC1090
       with:
         scandir: './installer'
