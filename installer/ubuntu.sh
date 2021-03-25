@@ -432,9 +432,14 @@ cd $basefolder/compose && $(command -v docker-compose) up -d --force-recreate 1>
 while true; do
   container="authelia traefik traefik-error-pages"
   for i in ${container}; do
-      if [[ "$($(command -v docker) container inspect -f '{{.State.Status}}' $i )" == "running" ]];then echo " --> Container $i is up and running <--" && sleep 2;fi
+      runningcheck=$($(command -v docker) ps -aq --format '{{.Names}} {{.State}}' | grep -x '$i running' 1>/dev/null 2>&1 && echo true || echo false)
+      if [[ $runningcheck == "true" ]];then
+         echo "--> Container $i is up and running <--"
+      else
+         deploynow
+      fi
   done
-break
+  break
 done
 tee <<-EOF
 
@@ -451,13 +456,6 @@ tee <<-EOF
 
 EOF
 sleep 30
-while true; do
-  container="authelia traefik traefik-error-pages"
-  for i in ${container}; do
-      if [[ "$($(command -v docker) container inspect -f '{{.State.Status}}' $i )" != "running" ]];then deploynow && sleep 2;fi
-  done
-break
-done
 interface
 }
 ######################################################
