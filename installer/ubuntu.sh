@@ -56,7 +56,7 @@ while true; do
      fi
   fi
   if [[ ! -x $(command -v docker) ]];then
-     if [[ -r /etc/os-release ]]; then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
+     if [[ -r /etc/os-release ]];then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
         package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common language-pack-en-base lshw nano rsync"
         package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common language-pack-en-base lshw nano rsync"
      if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]];then
@@ -109,11 +109,22 @@ while true; do
         package_list="ansible dialog python3-lxml"
         package_listdebian="apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367"
         package_listubuntu="apt-add-repository --yes --update ppa:ansible/ansible"
-        if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]]; then ${package_listubuntu} 1>/dev/null 2>&1;else ${package_listdebian} >/dev/null 2>1;fi
+        if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]];then ${package_listubuntu} 1>/dev/null 2>&1;else ${package_listdebian} >/dev/null 2>1;fi
         for i in ${package_list}; do
             $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1
         done
   fi
+     invet="/etc/ansible/inventories"
+     conf="/etc/ansible/ansible.cfg"
+     loc="local"
+     if [[ ! -d $invet ]];then $(command -v mkdir) -p $invet >/dev/null 2>1;fi
+        if [[ ! -f $invet/$loc ]];then
+        echo "\
+[local]
+127.0.0.1 ansible_connection=local" > $loc
+     fi
+     grep -qE "inventory      = /etc/ansible/inventories/local" $conf || \
+          echo "inventory      = /etc/ansible/inventories/local" >> $conf
   if [[ ! -x $(command -v fail2ban-client) ]];then $(command -v apt) install fail2ban -yqq 1>/dev/null 2>&1; fi
      while true; do
          f2ban=$($(command -v systemctl) is-active fail2ban | grep -qE 'active' && echo true || echo false)
@@ -324,7 +335,7 @@ EOF
    read -erp "Whats your CloudFlare-Global-Key: " CFGLOBAL
 
 if [[ $CFGLOBAL != "" ]];then
-   if [[ $(uname) == "Darwin" ]]; then
+   if [[ $(uname) == "Darwin" ]];then
       sed -i '' "s/example-CF-API-KEY/$CFGLOBAL/g" $basefolder/authelia/configuration.yml
       sed -i '' "s/example-CF-API-KEY/$CFGLOBAL/g" $basefolder/compose/docker-compose.yml
    else
