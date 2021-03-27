@@ -443,11 +443,15 @@ if [[ -f $env0 ]];then
        echo 'ID=1000' >> $basefolder/compose/.env
 fi
 }
+lang(){
+update-locale LANG=LANG=LC_ALL=en_US.UTF-8 LANGUAGE 1>/dev/null 2>&1
+localectl set-locale LANG=LC_ALL=en_US.UTF-8 1>/dev/null 2>&1
+}
+
 ##############
 deploynow() {
 basefolder="/opt/appdata"
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
+lang
 envcreate
 timezone
 cleanup
