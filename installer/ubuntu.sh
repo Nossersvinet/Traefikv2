@@ -113,6 +113,7 @@ while true; do
         for i in ${package_list}; do
             $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1
         done
+        if [[ $lsb_dist == 'ubuntu' ]];then sudo add-apt-repository --remove ppa:ansible/ansible;fi
   fi
      invet="/etc/ansible/inventories"
      conf="/etc/ansible/ansible.cfg"
