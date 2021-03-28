@@ -57,8 +57,8 @@ while true; do
   fi
   if [[ ! -x $(command -v docker) ]];then
      if [[ -r /etc/os-release ]];then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
-        package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common language-pack-en-base lshw nano rsync"
-        package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common language-pack-en-base lshw nano rsync"
+        package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common language-pack-en-base pciutils lshw nano rsync"
+        package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common language-pack-en-base pciutils lshw nano rsync"
      if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]];then
         for i in ${package_listubuntu}; do
             echo "install now $i"
@@ -98,9 +98,9 @@ while true; do
      $(command -v chmod) a=rx,u+w /usr/bin/docker-compose >/dev/null 2>&1
   fi
   if [[ -x $(command -v lshw) ]];then
-     gpu="i915 nvidia"
+     gpu="ntel vidia"
      for i in ${gpu}; do
-         TDV=$($(command -v lshw) -C video | grep -qE $i && echo true || echo false)
+         TDV=$(lspci | grep -i --color 'vga\|3d\|2d' | grep -E $i 1>/dev/null 2>&1 && echo true || echo false)
          if [[ $TDV == "true" ]];then $(command -v bash) ./templates/local/gpu.sh;fi
      done
   fi
@@ -122,7 +122,7 @@ while true; do
         if [[ ! -f $invet/$loc ]];then
         echo "\
 [local]
-127.0.0.1 ansible_connection=local" > $loc
+127.0.0.1 ansible_connection=local" > $invet/$loc
      fi
      grep -qE "inventory      = /etc/ansible/inventories/local" $conf || \
           echo "inventory      = /etc/ansible/inventories/local" >> $conf

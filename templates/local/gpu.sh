@@ -11,36 +11,38 @@ DCHK=$(cat /etc/docker/daemon.json | grep -qE 'nvidia' && echo true || echo fals
 RCHK=$(ls /etc/apt/sources.list.d/ 1>/dev/null 2>&1 | grep -qE 'nvidia' && echo true || echo false)
 HMOD=$(ls /etc/modprobe.d/ | grep -qE 'hetzner' && echo true || echo false)
 ITEL=$(cat /etc/modprobe.d/blacklist-hetzner.conf | grep -qE '#blacklist i915' && echo true || echo false)
-IMOL=$(cat /etc/default/grub | grep -qE '#GRUB_CMDLINE_LINUX_DEFAULT' && echo true || echo false)
+IMOL1=$(cat /etc/default/grub | grep -qE '#GRUB_CMDLINE_LINUX_DEFAULT' && echo true || echo false)
+IMOL2=$(cat /etc/default/grub.d/hetzner.cfg | grep -qE '#GRUB_CMDLINE_LINUX_DEFAULT' && echo true || echo false)
 GVID=$(id $(whoami) | grep -qE 'video' && echo true || echo false)
 GCHK=$(grep -qE video /etc/group && echo true || echo false)
 DEVT=$(ls /dev/dri 1>/dev/null 2>&1 && echo true || echo false)
 VIFO=$(command -v vainfo 1>/dev/null 2>&1 && echo true || echo false)
 INTE=$(ls /usr/bin/intel_gpu_* 1>/dev/null 2>&1 && echo true || echo false)
-IGPU=$(lshw -C video | grep -qE 'i915' && echo true || echo false)
-NGPU=$(lshw -C video | grep -qE 'nvidia' && echo true || echo false)
+IGPU=$(lspci | grep -i --color 'vga\|3d\|2d' | grep -E 'ntel' 1>/dev/null 2>&1 && echo true || echo false)
+NGPU=$(lspci | grep -i --color 'vga\|3d\|2d' | grep -E 'vidia' 1>/dev/null 2>&1 && echo true || echo false)
 DIST=$(. /etc/os-release;echo $ID$VERSION_ID)
 
 igpuhetzner() {
-if [[ $HMOD == "false" ]]; then exit 0; fi
-if [[ $ITEL == "false" ]]; then sed -i "s/blacklist i915/#blacklist i915/g" /etc/modprobe.d/blacklist-hetzner.conf; fi
-if [[ $IMOL == "false" ]]; then sed -i "s/GRUB_CMDLINE_LINUX_DEFAUL/#GRUB_CMDLINE_LINUX_DEFAUL/g" /etc/modprobe.d/blacklist-hetzner.conf; fi
-if [[ $IMOL == "true" && $ITEL == "true" ]]; then update-grub 1>/dev/null 2>&1; fi
-if [[ $GCHK == "false" ]]; then groupadd -f video 1>/dev/null 2>&1; fi
-if [[ $GVID == "false" ]]; then usermod -aG video $(whoami) 1>/dev/null 2>&1; fi
-if [[ $VIFO == "false" ]]; then $(command -v apt) install vainfo -yqq; fi
-if [[ $INTE == "false" && $IGPU == "true" ]]; then $(command -v apt) update -yqq && $(command -v apt) install intel-gpu-tools -yqq; fi
+if [[ $HMOD == "false" ]];then exit 0; fi
+if [[ $ITEL == "false" ]];then sed -i "s/blacklist i915/#blacklist i915/g" /etc/modprobe.d/blacklist-hetzner.conf; fi
+if [[ $IMOL1 == "false" ]];then sed -i "s/GRUB_CMDLINE_LINUX_DEFAUL/#GRUB_CMDLINE_LINUX_DEFAUL/g" /etc/default/grub; fi
+if [[ $IMOL2 == "false" ]];then sed -i "s/GRUB_CMDLINE_LINUX_DEFAUL/#GRUB_CMDLINE_LINUX_DEFAUL/g" /etc/default/grub.d/hetzner.cfg; fi
+if [[ $IMOL1 == "true" && $IMOL2 == "true" && $ITEL == "true" ]];then grub-mkconfig -o /boot/grub/grub.cfg 1>/dev/null 2>&1; fi
+if [[ $GCHK == "false" ]];then groupadd -f video 1>/dev/null 2>&1; fi
+if [[ $GVID == "false" ]];then usermod -aG video $(whoami) 1>/dev/null 2>&1; fi
+if [[ $VIFO == "false" ]];then $(command -v apt) install vainfo -yqq; fi
+if [[ $INTE == "false" && $IGPU == "true" ]];then $(command -v apt) update -yqq && $(command -v apt) install intel-gpu-tools -yqq; fi
 endcommand
-if [[ $IMOL == "true" && $ITEL == "true" && $GVID == "true" && $DEVT == "true" ]]; then echo "Intel IGPU is working"; else echo "Intel IGPU is not working"; fi
+if [[ $IMOL1 == "true" && $IMOL2 == "true" && $ITEL == "true" && $GVID == "true" && $DEVT == "true" ]];then echo "Intel IGPU is working"; else echo "Intel IGPU is not working"; fi
 }
 nvidiagpu() {
-if [[ $RCHK == "false" ]]; then
+if [[ $RCHK == "false" ]];then
    curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | \
      apt-key add -
    curl -s -L https://nvidia.github.io/nvidia-docker/$DIST/nvidia-docker.list | \
      tee /etc/apt/sources.list.d/nvidia-docker.list
 fi
-if [[ $CHKN != "true" ]]; then
+if [[ $CHKN != "true" ]];then
    package_list="nvidia-container-toolkit nvidia-container-runtime"
    packageup="update upgrade dist-upgrade"
    for i in ${packageup}; do
@@ -50,7 +52,7 @@ if [[ $CHKN != "true" ]]; then
        $(command -v apt) install $i -yqq 1>/dev/null 2>&1
    done
 fi
-if [[ $DCHK == "false" ]]; then
+if [[ $DCHK == "false" ]];then
 sudo tee /etc/docker/daemon.json <<EOF
 {
     "default-runtime": "nvidia",
@@ -63,13 +65,13 @@ sudo tee /etc/docker/daemon.json <<EOF
 }
 EOF
 fi
-if [[ $GVID == "false" ]]; then usermod -aG video $(whoami); fi
-if [[ $DREA == "true" ]]; then pkill -SIGHUP dockerd; fi
+if [[ $GVID == "false" ]];then usermod -aG video $(whoami); fi
+if [[ $DREA == "true" ]];then pkill -SIGHUP dockerd; fi
 endcommand
-if [[ $DREA == "true" && $DCHK == "true" && $CHKN == "true" && $DEVT != "false" ]]; then echo "nvidia-container-runtime is working"; else echo "nvidia-container-runtime is not working"; fi
+if [[ $DREA == "true" && $DCHK == "true" && $CHKN == "true" && $DEVT != "false" ]];then echo "nvidia-container-runtime is working"; else echo "nvidia-container-runtime is not working"; fi
 }
 endcommand() {
-if [[ $DEVT != "false" ]]; then
+if [[ $DEVT != "false" ]];then
    $(command -v chmod) -R 750 /dev/dri
 else
    echo ""
@@ -77,12 +79,12 @@ else
 after restarting execute the install again\033[0m\n"
    echo ""
    read -p "Type confirm to reboot: " input
-   if [[ "$input" = "confirm" ]]; then reboot -n; else endcommand; fi
+   if [[ "$input" = "confirm" ]];then reboot -n; else endcommand; fi
 fi
 }
 while true; do
-    if [[ $IGPU == "true" && $NGPU == "false" ]]; then igpuhetzner && break && exit; 
-  elif [[ $IGPU == "true" && $NGPU == "true" ]]; then nvidiagpu && break && exit;
-  elif [[ $IGPU == "false" && $NGPU == "true" ]]; then nvidiagpu && break && exit;
+    if [[ $IGPU == "true" && $NGPU == "false" ]];then igpuhetzner && break && exit
+  elif [[ $NGPU == "true" && $IGPU == "true" ]];then nvidiagpu && break && exit
+  elif [[ $NGPU == "true" && $IGPU == "false" ]];then nvidiagpu && break && exit
   else break && exit;fi
 done
