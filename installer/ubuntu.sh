@@ -98,7 +98,7 @@ while true; do
      $(command -v chmod) a=rx,u+w /usr/bin/docker-compose >/dev/null 2>&1
   fi
   if [[ -x $(command -v lshw) ]];then
-     gpu="ntel vidia"
+     gpu="ntel NVIDIA"
      for i in ${gpu}; do
          TDV=$(lspci | grep -i --color 'vga\|3d\|2d' | grep -E $i 1>/dev/null 2>&1 && echo true || echo false)
          if [[ $TDV == "true" ]];then $(command -v bash) ./templates/local/gpu.sh;fi

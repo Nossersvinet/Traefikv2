@@ -19,7 +19,7 @@ DEVT=$(ls /dev/dri 1>/dev/null 2>&1 && echo true || echo false)
 VIFO=$(command -v vainfo 1>/dev/null 2>&1 && echo true || echo false)
 INTE=$(ls /usr/bin/intel_gpu_* 1>/dev/null 2>&1 && echo true || echo false)
 IGPU=$(lspci | grep -i --color 'vga\|3d\|2d' | grep -E 'ntel' 1>/dev/null 2>&1 && echo true || echo false)
-NGPU=$(lspci | grep -i --color 'vga\|3d\|2d' | grep -E 'vidia' 1>/dev/null 2>&1 && echo true || echo false)
+NGPU=$(lspci | grep -i --color 'vga\|3d\|2d' | grep -E 'NVIDIA' 1>/dev/null 2>&1 && echo true || echo false)
 DIST=$(. /etc/os-release;echo $ID$VERSION_ID)
 
 igpuhetzner() {
