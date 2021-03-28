@@ -165,9 +165,9 @@ chain = DOCKER-USER">> /etc/fail2ban/jail.local
   $(command -v rsync) /opt/traefik/templates/ /opt/appdata/ -aq --info=progress2 -hv --exclude={'local','installer'}
   basefolder="/opt/appdata"
   for i in ${basefolder}; do
-      $(command -v mkdir) -p $i/{authelia,traefik,compose,portainer} \
+      $(command -v mkdir) -p $i/{authelia,traefik,compose} \
                $i/traefik/{rules,acme}
-      $(command -v find) $i/{authelia,traefik,compose,portainer} -exec $(command -v chown) -hR 1000:1000 {} \;
+      $(command -v find) $i/{authelia,traefik,compose} -exec $(command -v chown) -hR 1000:1000 {} \;
   done
   $(command -v touch) ${basefolder}/traefik/acme/acme.json \
         ${basefolder}/traefik/traefik.log \
