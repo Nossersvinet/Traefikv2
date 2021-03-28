@@ -447,11 +447,36 @@ lang(){
 update-locale LANG=LANG=LC_ALL=en_US.UTF-8 LANGUAGE 1>/dev/null 2>&1
 localectl set-locale LANG=LC_ALL=en_US.UTF-8 1>/dev/null 2>&1
 }
+#setarecord(){
+### unfinished 
+#if [[ ! -x $(command -v jq) ]];then $(command -v apt) install --reinstall jq -yqq 1>/dev/null 2>&1;fi
+#zone=$DOMAIN
+#dnsrecord=$DOMAIN
+#cloudflare_auth_email=$EMAIL
+#cloudflare_auth_key=$CFGLOBAL
+
+#zoneid=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=$zone&status=active" \
+#  -H "X-Auth-Email: $cloudflare_auth_email" \
+#  -H "Authorization: Bearer $cloudflare_auth_key" \
+#  -H "Content-Type: application/json" | jq -r '{"result"}[] | .[0] | .id')
+
+#dnsrecordid=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$zoneid/dns_records?type=A&name=$dnsrecord" \
+#  -H "X-Auth-Email: $cloudflare_auth_email" \
+#  -H "Authorization: Bearer $cloudflare_auth_key" \
+#  -H "Content-Type: application/json" | jq -r '{"result"}[] | .[0] | .id')
+
+#curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$zoneid/dns_records/$dnsrecordid" \
+#  -H "X-Auth-Email: $cloudflare_auth_email" \
+#  -H "Authorization: Bearer $cloudflare_auth_key" \
+#  -H "Content-Type: application/json" \
+# --data "{\"type\":\"A\",\"name\":\"$dnsrecord\",\"content\":\"$ip\",\"ttl\":1,\"proxied\":false}" | jq
+#}
 
 ##############
 deploynow() {
 basefolder="/opt/appdata"
 compose="compose/docker-compose.yml"
+#setarecord
 lang
 envcreate
 timezone
@@ -469,7 +494,7 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     ❌ ERROR
     compose check was failed
-    Return code was ${errorcode}
+    Return code was ${code}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
   read -erp "Confirm Info | PRESS [ENTER]" typed </dev/tty
