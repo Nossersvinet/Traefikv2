@@ -57,8 +57,8 @@ while true; do
   fi
   if [[ ! -x $(command -v docker) ]];then
      if [[ -r /etc/os-release ]];then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
-        package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common language-pack-en-base pciutils lshw nano rsync"
-        package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common language-pack-en-base pciutils lshw nano rsync"
+        package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common language-pack-en-base pciutils lshw nano rsync fuse"
+        package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common language-pack-en-base pciutils lshw nano rsync fuse"
      if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]];then
         for i in ${package_listubuntu}; do
             echo "install now $i"
@@ -84,7 +84,7 @@ while true; do
   if [[ $dockertest != "false" ]];then $(command -v systemctl) reload-or-restart docker.service 1>/dev/null 2>&1 && $(command -v systemctl) enable docker.service >/dev/null 2>&1; fi
      mntcheck=$($(command -v docker) volume ls | grep -qE 'unionfs' && echo true || echo false)
   if [[ $mntcheck == "false" ]];then
-     $(command -v curl) --silent -fsSL https://raw.githubusercontent.com/MatchbookLab/local-persist/master/scripts/install.sh | sudo bash
+     $(command -v curl) --silent -fsSL https://raw.githubusercontent.com/MatchbookLab/local-persist/master/scripts/install.sh | sudo bash 1>/dev/null 2>&1
      $(command -v docker) volume create -d local-persist -o mountpoint=/mnt --name=unionfs
   fi
      networkcheck=$($(command -v docker) network ls | grep -qE 'proxy' && echo true || echo false)
@@ -451,6 +451,7 @@ localectl set-locale LANG=LC_ALL=en_US.UTF-8 1>/dev/null 2>&1
 ##############
 deploynow() {
 basefolder="/opt/appdata"
+compose="compose/docker-compose.yml"
 lang
 envcreate
 timezone
@@ -458,35 +459,34 @@ cleanup
 jounanctlpatch
 serverip
 ccont
-cd $basefolder/compose && $(command -v docker-compose) up -d --force-recreate 1>/dev/null 2>&1 && sleep 5
-while true; do
-  container="authelia traefik traefik-error-pages"
-  for i in ${container}; do
-      if [[ "$($(command -v docker) container inspect -f '{{.State.Status}}' $i )" == "running" ]];then
-         echo "--> Container $i is up and running <--"
-      fi
-  done
-  break
-done
+#cd $basefolder/compose && $(command -v docker-compose) up -d --force-recreate 1>/dev/null 2>&1 && sleep 5
+if [[ -f $basefolder/$compose ]];then
+   $(command -v cd) $basefolder/compose/
+   $(command -v docker-compose) config 1>/dev/null 2>&1
+   code=$?
+   if [[ $code -ne 0 ]];then
 tee <<-EOF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    ❌ ERROR
+    compose check was failed
+    Return code was ${errorcode}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EOF
+  read -erp "Confirm Info | PRESS [ENTER]" typed </dev/tty
+clear && interface
+   else
+   $(command -v docker-compose) up -d --force-recreate 1>/dev/null 2>&1
+   tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 Treafikv2 with Authelia
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-       Traefikv2 with Authelia is deployed
+	   Traefikv2 with Authelia is deployed
    Please Wait some minutes Authelia and Treafik 
-     need some minutes to start all services
+	 need some minutes to start all services
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
-sleep 10
-while true; do
-  container="authelia traefik traefik-error-pages"
-  for i in ${container}; do
-      if [[ "$($(command -v docker) container inspect -f '{{.State.Status}}' $i )" != "running" ]];then
-         deploynow
-      fi
-  done
-break
-done
+   fi
+ fi
 interface
 }
 ######################################################
