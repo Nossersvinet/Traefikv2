@@ -501,13 +501,20 @@ EOF
 clear && interface
    else
    $(command -v docker-compose) up -d --force-recreate 1>/dev/null 2>&1
+   source $basefolder/compose/.env
    tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 Treafikv2 with Authelia
+   🚀 Treafikv2 with Authelia
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 	   Traefikv2 with Authelia is deployed
-   Please Wait some minutes Authelia and Treafik 
+      Please Wait some minutes Authelia and Treafik 
 	 need some minutes to start all services
+
+        Access to the apps are only over https://
+
+        Authelia:   https://authelia.${DOMAIN}
+        Traefik:    https://traefik.${DOMAIN}
+        Portainer:  https://portainer.${DOMAIN}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
    fi
