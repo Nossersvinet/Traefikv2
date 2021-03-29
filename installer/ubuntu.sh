@@ -100,7 +100,7 @@ while true; do
      dailyapt=$($(command -v systemctl) is-active apt-daily | grep -qE 'active' && echo true || echo false)
      dailyupg=$($(command -v systemctl) is-active apt-daily-upgrade | grep -qE 'active' && echo true || echo false)
   if [[ $dailyapt == "true" || $dailyupg == "true" ]];then
-     disable="apt-daily.service apt-daily.timer apt-daily-upgrade.timer apt-daily-upgrade.service
+     disable="apt-daily.service apt-daily.timer apt-daily-upgrade.timer apt-daily-upgrade.service"
      for i in ${disable};do
         systemctl disable $i >/dev/null 2>&1
      done
