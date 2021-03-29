@@ -97,6 +97,14 @@ while true; do
      $(command -v chmod) a=rx,u+w /usr/local/bin/docker-compose >/dev/null 2>&1
      $(command -v chmod) a=rx,u+w /usr/bin/docker-compose >/dev/null 2>&1
   fi
+     dailyapt=$($(command -v systemctl) is-active apt-daily | grep -qE 'active' && echo true || echo false)
+     dailyupg=$($(command -v systemctl) is-active apt-daily-upgrade | grep -qE 'active' && echo true || echo false)
+  if [[ $dailyapt == "true" || $dailyupg == "true" ]];then
+     disable="apt-daily.service apt-daily.timer apt-daily-upgrade.timer apt-daily-upgrade.service
+     for i in ${disable};do
+        systemctl disable $i >/dev/null 2>&1
+     done
+  fi
   if [[ -x $(command -v lshw) ]];then
      gpu="ntel NVIDIA"
      for i in ${gpu}; do
