@@ -19,7 +19,7 @@ updatesystem() {
 if [[ $EUID -ne 0 ]];then
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⛔  You Must Execute as a SUDO USER (with sudo) or as ROOT!
+⛔  You must execute as a SUDO user (with sudo) or as ROOT!
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
 exit 0
@@ -61,13 +61,13 @@ while true; do
         package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common language-pack-en-base pciutils lshw nano rsync fuse"
      if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]];then
         for i in ${package_listubuntu}; do
-            echo "install now $i"
+            echo "Now installing $i"
             $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1
             sleep 1
         done
      else
         for i in ${package_listdebian}; do
-            echo "install now $i"
+            echo "Now installing $i"
             $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1
             sleep 1
         done
@@ -138,7 +138,7 @@ while true; do
      while true; do
          f2ban=$($(command -v systemctl) is-active fail2ban | grep -qE 'active' && echo true || echo false)
          if [[ $f2ban != 'true' ]];then
-            echo "Waiting for running fail2ban" && sleep 1 && continue
+            echo "Waiting for fail2ban to start" && sleep 1 && continue
          else
             break
          fi
@@ -195,10 +195,10 @@ oldsinstall() {
           show=$(find $ii -maxdepth 1 -type d -name $i -print)
           if [[ $show != '' ]];then
              echo ""
-             printf "\033[0;31m You need to reinstall your Server 
-sorry you need a clean server we cant update on top on $i\033[0m\n"
+             printf "\033[0;31m You need to reinstall your operating system. 
+sorry, you need a freshly installed server. We can not install on top. $i\033[0m\n"
              echo ""
-             read -erp "Type confirm when you read the message: " input
+             read -erp "Type confirm when you have read the message: " input
              if [[ "$input" = "confirm" ]];then exit ;else oldsinstall;fi
           fi
       done
@@ -222,13 +222,13 @@ tee <<-EOF
 🚀 Treafikv2 Domain
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Cloudflare API don't works with follow TLD Domains
-.a .cf, .ga, .gq, .ml, or .tk
+Cloudflare DNS will not be automated with the following TLD Domains
+.a, .cf, .ga, .gq, .ml or .tk
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-   read -erp "What root domain would you like to protect?: " DOMAIN
+   read -erp "Which domain would you like to use?: " DOMAIN
 
 if [[ $DOMAIN == "" ]];then
    echo "Domain cannot be empty"
@@ -264,7 +264,7 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-   read -erp "Enter your display name for Authelia (eg. John Doe): " DISPLAYNAME
+   read -erp "Enter your username for Authelia (eg. John Doe): " DISPLAYNAME
 
 if [[ $DISPLAYNAME != "" ]];then
    if [[ $(uname) == "Darwin" ]];then
@@ -321,7 +321,7 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-   read -erp "Whats your CloudFlare-Email-Address : " EMAIL
+   read -erp "What is your CloudFlare Email Address : " EMAIL
 
 if [[ $EMAIL != "" ]];then
    if [[ $(uname) == "Darwin" ]];then
@@ -332,7 +332,7 @@ if [[ $EMAIL != "" ]];then
       sed -i "s/example-CF-EMAIL/$EMAIL/g" $basefolder/compose/docker-compose.yml
    fi
 else
-  echo "CloudFlare-Email-Address cannot be empty"
+  echo "CloudFlare Email Address cannot be empty"
   cfemail
 fi
 interface
@@ -346,7 +346,7 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-   read -erp "Whats your CloudFlare-Global-Key: " CFGLOBAL
+   read -erp "What is your CloudFlare Global Key: " CFGLOBAL
 
 if [[ $CFGLOBAL != "" ]];then
    if [[ $(uname) == "Darwin" ]];then
@@ -357,7 +357,7 @@ if [[ $CFGLOBAL != "" ]];then
       sed -i "s/example-CF-API-KEY/$CFGLOBAL/g" $basefolder/compose/docker-compose.yml
    fi
 else
-   echo "CloudFlare-Global-Key cannot be empty"
+   echo "CloudFlare Global Key cannot be empty"
    cfkey
 fi
 interface
@@ -371,7 +371,7 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
-   read -erp "Whats your CloudFlare-Zone-ID: " CFZONEID
+   read -erp "Whats your CloudFlare Zone ID: " CFZONEID
 
 if [[ $CFZONEID != "" ]];then
    if [[ $(uname) == "Darwin" ]];then
@@ -380,7 +380,7 @@ if [[ $CFZONEID != "" ]];then
       sed -i "s/example-CF-ZONE_ID/$CFZONEID/g" $basefolder/compose/docker-compose.yml
    fi
 else
-   echo "CloudFlare-Zone-ID cannot be empty"
+   echo "CloudFlare Zone ID cannot be empty"
    cfzoneid
 fi
 interface
@@ -416,7 +416,7 @@ if [[ $SERVERIP != "" ]];then
       sed -i "s/SERVERIP_ID/$SERVERIP/g" $basefolder/compose/.env
    fi
 else
-   echo "Server-IP cannot be empty"
+   echo "Server IP cannot be empty"
    serverip
 fi
 }
@@ -506,8 +506,8 @@ if [[ -f $basefolder/$compose ]];then
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     ❌ ERROR
-    compose check was failed
-    Return code was ${code}
+    compose check has failed
+    Return code is ${code}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
   read -erp "Confirm Info | PRESS [ENTER]" typed </dev/tty
