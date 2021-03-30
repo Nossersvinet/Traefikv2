@@ -97,6 +97,14 @@ while true; do
      $(command -v chmod) a=rx,u+w /usr/local/bin/docker-compose >/dev/null 2>&1
      $(command -v chmod) a=rx,u+w /usr/bin/docker-compose >/dev/null 2>&1
   fi
+     dailyapt=$($(command -v systemctl) is-active apt-daily | grep -qE 'active' && echo true || echo false)
+     dailyupg=$($(command -v systemctl) is-active apt-daily-upgrade | grep -qE 'active' && echo true || echo false)
+  if [[ $dailyapt == "true" || $dailyupg == "true" ]];then
+     disable="apt-daily.service apt-daily.timer apt-daily-upgrade.timer apt-daily-upgrade.service"
+     for i in ${disable};do
+        systemctl disable $i >/dev/null 2>&1
+     done
+  fi
   if [[ -x $(command -v lshw) ]];then
      gpu="ntel NVIDIA"
      for i in ${gpu}; do
@@ -212,6 +220,11 @@ tee <<-EOF
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 Treafikv2 Domain
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Cloudflare API don't works with follow TLD Domains
+.a .cf, .ga, .gq, .ml, or .tk
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 EOF
@@ -501,13 +514,20 @@ EOF
 clear && interface
    else
    $(command -v docker-compose) up -d --force-recreate 1>/dev/null 2>&1
+   source $basefolder/compose/.env
    tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 Treafikv2 with Authelia
+   🚀 Treafikv2 with Authelia
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 	   Traefikv2 with Authelia is deployed
-   Please Wait some minutes Authelia and Treafik 
+      Please Wait some minutes Authelia and Treafik 
 	 need some minutes to start all services
+
+        Access to the apps are only over https://
+
+        Authelia:   https://authelia.${DOMAIN}
+        Traefik:    https://traefik.${DOMAIN}
+        Portainer:  https://portainer.${DOMAIN}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
    fi
