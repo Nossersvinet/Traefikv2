@@ -196,7 +196,7 @@ oldsinstall() {
           if [[ $show != '' ]];then
              echo ""
              printf "\033[0;31m You need to reinstall your operating system. 
-sorry, you need a freshly installed server. We can not install on top. $i\033[0m\n"
+sorry, you need a freshly installed server. We can not install on top of $i\033[0m\n"
              echo ""
              read -erp "Type confirm when you have read the message: " input
              if [[ "$input" = "confirm" ]];then exit ;else oldsinstall;fi
