@@ -222,8 +222,13 @@ tee <<-EOF
 🚀 Treafikv2 Domain
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Cloudflare DNS will not be automated with the following TLD Domains
-.a, .cf, .ga, .gq, .ml or .tk
+DNS records will not be automatically added with the following 
+TLD Domains 
+
+.a, .cf, .ga, .gq, .ml or .tk 
+
+Cloudflare has limited their API so you will have to manually add these 
+records yourself via the Cloudflare dashboard.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
