@@ -30,8 +30,8 @@ sleep 1
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     ❌ INFO
-    please add follow features to your LXC Container
-    keyctl, nesting and fuse
+    Please add the follow features keyctl, nesting and fuse under LXC Options > Features, 
+    this is only available when Unprivileged container=Yes
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
   read -erp "Confirm Info | PRESS [ENTER]" typed </dev/tty
