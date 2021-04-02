@@ -18,3 +18,16 @@
 
 ## note
 ## here the actions
+LXC() {
+  if [[ ! -x $(command -v rsync) ]];then $(command -v apt) install --reinstall rsync -yqq 1>/dev/null 2>&1;fi
+     $(command -v rsync) /opt/traefik/installer/.subinstall/lxcstart.sh /root/lxcstart.sh -aq --info=progress2 -hv
+     $(command -v chmod) a+x /root/lxcstart.sh
+## set crontab
+
+
+
+if [[ "$(systemd-detect-virt)" == "lxc" ]];then
+   LXC
+else
+   exit
+fi
