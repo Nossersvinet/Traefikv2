@@ -9,3 +9,6 @@
 ################################################################################
 
 ## command here below
+## make / possible to add /mnt:shared
+
+mount --make-shared /
