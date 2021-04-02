@@ -30,7 +30,8 @@ sleep 1
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     ❌ INFO
-    Please add the follow features keyctl, nesting and fuse under LXC Options > Features, 
+    Please be sure that you have add the following features 
+    keyctl, nesting and fuse under LXC Options > Features, 
     this is only available when Unprivileged container=Yes
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
