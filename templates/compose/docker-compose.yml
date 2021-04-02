@@ -68,6 +68,7 @@ services:
       - 'CLOUDFLARE_EMAIL=example-CF-EMAIL'
       - 'CLOUDFLARE_API_KEY=example-CF-API-KEY'
     labels:
+      - 'dockupdater.enable=false'
       - 'traefik.enable=true'
       - 'traefik.http.routers.http-catchall.entrypoints=http'
       - 'traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)'
@@ -88,6 +89,8 @@ services:
     security_opt:
       - 'no-new-privileges:true'
     restart: 'always'
+    labels:
+      - 'dockupdater.enable=true'
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock:ro'
     environment:
@@ -116,6 +119,7 @@ services:
       - 'TZ=UTC'
     labels:
       - 'traefik.enable=true'
+      - 'dockupdater.enable=true'
       - 'traefik.docker.network=proxy'
       - 'traefik.http.routers.traefik-error-pages-rtr.entrypoints=http'
       - 'traefik.http.routers.traefik-error-pages-rtr.rule=HostRegexp(`{host:.+}`)'
@@ -145,6 +149,7 @@ services:
       - 'TZ=UTC'
     labels:
       - 'traefik.enable=true'
+      - 'dockupdater.enable=true'
       - 'traefik.docker.network=proxy'
       - 'traefik.http.routers.authelia-rtr.entrypoints=https'
       - 'traefik.http.routers.authelia-rtr.rule=Host(`authelia.example.com`)'
@@ -171,6 +176,7 @@ services:
       - 'PUID=1000'
       - 'TZ=UTC'
     labels:
+      - 'dockupdater.enable=true'
       - 'traefik.enable=true'
       - 'traefik.docker.network=proxy'
       - 'traefik.http.routers.frontend.rule=Host(`portainer.example.com`)'
