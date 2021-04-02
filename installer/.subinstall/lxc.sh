@@ -25,7 +25,8 @@ cat <<EOF > /etc/cron.d/lxcstart
 SHELL=/bin/bash
 @reboot root /bin/bash /home/.lxcstart.sh 1>/dev/null 2>&1
 EOF
-sleep 5
+$(command -v chmod) a=rx,u+w /etc/cron.d/lxcstart
+sleep 1
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     ❌ INFO
