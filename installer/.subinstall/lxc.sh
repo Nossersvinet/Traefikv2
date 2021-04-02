@@ -22,7 +22,8 @@ LXC() {
 ## set cron.d
   if [[ ! -f "/etc/cron.d/lxcstart" ]];then
 cat <<EOF > /etc/cron.d/lxcstart
-@reboot root /home/.lxcstart.sh 1>/dev/null 2>&1
+SHELL=/bin/bash
+@reboot root /bin/bash /home/.lxcstart.sh 1>/dev/null 2>&1
 EOF
 sleep 5
 tee <<-EOF
