@@ -15,14 +15,12 @@
 # shellcheck disable=SC2196
 # shellcheck disable=SC2046
 #FUNCTIONS
-
-## note
-## here the actions
 LXC() {
   if [[ ! -x $(command -v rsync) ]];then $(command -v apt) install --reinstall rsync -yqq 1>/dev/null 2>&1;fi
-     $(command -v rsync) /opt/traefik/installer/.subinstall/lxcstart.sh /home/.lxcstart.sh -aq --info=progress2 -hv
-     $(command -v chmod) a+x /home/.lxcstart.sh
-## set crontab
+  if [[ ! -f "/home/.lxcstart.sh" ]];then $(command -v rsync) /opt/traefik/installer/.subinstall/lxcstart.sh /home/.lxcstart.sh -aq --info=progress2 -hv;fi
+  if [[ -f "/home/.lxcstart.sh" ]];then $(command -v chmod) a+x /home/.lxcstart.sh;fi
+## set cron.d
+  if [[ ! -f "/etc/cron.d/lxcstart" ]];then
 cat <<EOF > /etc/cron.d/lxcstart
 @reboot root /home/.lxcstart.sh 1>/dev/null 2>&1
 EOF
@@ -35,14 +33,10 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
   read -erp "Confirm Info | PRESS [ENTER]" typed </dev/tty
-
-
+fi
 clear && exit
 }
-
-
-if [[ "$(systemd-detect-virt)" == "lxc" ]];then
-   LXC
-else
-   exit
-fi
+while true; do
+ if [[ "$(systemd-detect-virt)" != "lxc" ]];then exit;fi
+ LXC
+done
