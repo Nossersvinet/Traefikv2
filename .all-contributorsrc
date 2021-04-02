@@ -23,6 +23,15 @@
       "contributions": [
         "infra"
       ]
+    },
+    {
+      "login": "mrfret",
+      "name": "mrfret",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72273384?v=4",
+      "profile": "https://github.com/mrfret",
+      "contributions": [
+        "test"
+      ]
     }
   ],
   "badgeTemplate": "<a href=\"#contributors-\"><img alt=\"All Contributors\" src=\"https://img.shields.io/badge/all_contributors-<%= contributors.length %>-orange.svg\"/></a>",
