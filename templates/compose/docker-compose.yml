@@ -157,38 +157,6 @@ services:
       - 'traefik.http.routers.authelia-rtr.service=authelia-svc'
       - 'traefik.http.services.authelia-svc.loadbalancer.server.port=9091'
 
-  portainer:
-    container_name: portainer
-    image: portainer/portainer-ce:latest
-    restart: 'unless-stopped'
-    depends_on:
-      - traefik
-      - authelia
-    networks:
-      - proxy
-    security_opt:
-      - 'no-new-privileges:true'
-    volumes:
-      - '/var/run/docker.sock:/var/run/docker.sock:ro'
-      - portainer:/data
-    environment:
-      - 'PGID=1000'
-      - 'PUID=1000'
-      - 'TZ=UTC'
-    labels:
-      - 'dockupdater.enable=true'
-      - 'traefik.enable=true'
-      - 'traefik.docker.network=proxy'
-      - 'traefik.http.routers.frontend.rule=Host(`portainer.example.com`)'
-      - 'traefik.http.routers.frontend.entrypoints=https'
-      - 'traefik.http.services.frontend.loadbalancer.server.port=9000'
-      - 'traefik.http.routers.frontend.service=frontend'
-      - 'traefik.http.routers.frontend.tls.certresolver=dns-cloudflare'
-    restart: 'unless-stopped'
-
-volumes:
-  portainer:
-
 networks:
   proxy:
     driver: bridge
