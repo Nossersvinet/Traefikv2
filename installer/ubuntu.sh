@@ -89,7 +89,8 @@ while true; do
   fi
      networkcheck=$($(command -v docker) network ls | grep -qE 'proxy' && echo true || echo false)
   if [[ $networkcheck == "false" ]];then $(command -v docker) network create --driver=bridge proxy 1>/dev/null 2>&1; fi
-  if [[ ! -x $(command -v docker-compose) ]];then
+
+  if [ ! -x $(command -v docker-compose) ] || [ -x $(command -v docker-compose) ];then
      COMPOSE_VERSION=$($(command -v curl) --silent -fsSL https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
      sh -c "curl --silent -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose"
      sh -c "curl --silent -L https://raw.githubusercontent.com/docker/compose/${COMPOSE_VERSION}/contrib/completion/bash/docker-compose > /etc/bash_completion.d/docker-compose"
