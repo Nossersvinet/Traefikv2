@@ -29,15 +29,14 @@ while true; do
   oldsinstall && proxydel
   package_list="update upgrade dist-upgrade autoremove autoclean"
   for i in ${package_list}; do
-      echo "running now $i"
-      $(command -v apt) $i -yqq 1>/dev/null 2>&1
+      echo "running now $i" && $(command -v apt) $i -yqq 1>/dev/null 2>&1
   done
   if [[ ! -d "/mnt/downloads" && ! -d "/mnt/unionfs" ]];then
      basefolder="/mnt"
      for i in ${basefolder}; do
-         $(command -v mkdir) -p $i/{unionfs,downloads,incomplete,torrent,nzb} \
-                  $i/{incomplete,downloads}/{nzb,torrent}/{movies,tv,tv4k,movies4k,movieshdr,tvhdr,remux} \
-                  $i/{torrent,nzb}/watch
+        $(command -v mkdir) -p $i/{unionfs,downloads,incomplete,torrent,nzb} \
+                               $i/{incomplete,downloads}/{nzb,torrent}/{movies,tv,tv4k,movies4k,movieshdr,tvhdr,remux} \
+                               $i/{torrent,nzb}/watch
         $(command -v find) $i -exec $(command -v chmod) a=rx,u+w {} \;
         $(command -v find) $i -exec $(command -v chown) -hR 1000:1000 {} \;
      done
@@ -57,39 +56,36 @@ while true; do
   fi
   if [[ ! -x $(command -v docker) ]];then
      if [[ -r /etc/os-release ]];then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
-        package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent software-properties-common language-pack-en-base pciutils lshw nano rsync fuse"
-        package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2 software-properties-common language-pack-en-base pciutils lshw nano rsync fuse"
-     if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]];then
-        for i in ${package_listubuntu}; do
-            echo "Now installing $i"
-            $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1
-            sleep 1
+        package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent"
+        package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2"
+        package_basic="software-properties-common language-pack-en-base pciutils lshw nano rsync fuse"
+        if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]];then
+           for i in ${package_listubuntu};do
+               echo "Now installing $i" && $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1 && sleep 1
+           done
+        else
+           for i in ${package_listdebian};do
+               echo "Now installing $i" && $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1 && sleep 1
+           done
+        fi
+        for i in ${package_basic};do
+            echo "Now installing $i" && $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1 && sleep 1
         done
-     else
-        for i in ${package_listdebian}; do
-            echo "Now installing $i"
-            $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1
-            sleep 1
-        done
-     fi
-     $(command -v curl) --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
-     cp /opt/traefik/templates/local/daemon.j2 /etc/docker/daemon.json
-  else
-     cp /opt/traefik/templates/local/daemon.j2 /etc/docker/daemon.json
-     $(command -v curl) --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
   fi
+     $(command -v curl) --silent -fsSL https://raw.githubusercontent.com/docker/docker-install/master/install.sh | sudo bash > /dev/null 2>&1
+     $(command -v rsync) -aq --info=progress2 -hv /opt/traefik/templates/local/daemon.j2 /etc/docker/daemon.json 1>/dev/null 2>&1
      dockergroup=$(grep -qE docker /etc/group && echo true || echo false)
-  if [[ $dockergroup == "false" ]];then usermod -aG docker $(whoami);fi
+  if [[ $dockergroup == "false" ]];then $(command -v usermod) -aG docker $(whoami);fi
      dockertest=$($(command -v systemctl) is-active docker | grep -qE 'active' && echo true || echo false)
-  if [[ $dockertest != "false" ]];then $(command -v systemctl) reload-or-restart docker.service 1>/dev/null 2>&1 && $(command -v systemctl) enable docker.service >/dev/null 2>&1; fi
+  if [[ $dockertest != "false" ]];then $(command -v systemctl) reload-or-restart docker.service 1>/dev/null 2>&1 && $(command -v systemctl) enable docker.service >/dev/null 2>&1;fi
      mntcheck=$($(command -v docker) volume ls | grep -qE 'unionfs' && echo true || echo false)
   if [[ $mntcheck == "false" ]];then
      $(command -v curl) --silent -fsSL https://raw.githubusercontent.com/MatchbookLab/local-persist/master/scripts/install.sh | sudo bash 1>/dev/null 2>&1
      $(command -v docker) volume create -d local-persist -o mountpoint=/mnt --name=unionfs
   fi
      networkcheck=$($(command -v docker) network ls | grep -qE 'proxy' && echo true || echo false)
-  if [[ $networkcheck == "false" ]];then $(command -v docker) network create --driver=bridge proxy 1>/dev/null 2>&1; fi
-
+  if [[ $networkcheck == "false" ]];then $(command -v docker) network create --driver=bridge proxy 1>/dev/null 2>&1;fi
+  if [[ ! -x $(command -v rsync) ]];then $(command -v apt) install --reinstall rsync -yqq 1>/dev/null 2>&1;fi
   if [ ! -x $(command -v docker-compose) ] || [ -x $(command -v docker-compose) ];then
      COMPOSE_VERSION=$($(command -v curl) --silent -fsSL https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
      sh -c "curl --silent -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose"
@@ -109,7 +105,7 @@ while true; do
   if [[ "$(systemd-detect-virt)" == "lxc" ]];then $(command -v bash) ./.subinstall/lxc.sh;fi
   if [[ -x $(command -v lshw) ]];then
      gpu="ntel NVIDIA"
-     for i in ${gpu}; do
+     for i in ${gpu};do
          TDV=$(lspci | grep -i --color 'vga\|3d\|2d' | grep -E $i 1>/dev/null 2>&1 && echo true || echo false)
          if [[ $TDV == "true" ]];then $(command -v bash) ./templates/local/gpu.sh;fi
      done
@@ -120,7 +116,7 @@ while true; do
         package_listdebian="apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367"
         package_listubuntu="apt-add-repository --yes --update ppa:ansible/ansible"
         if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]];then ${package_listubuntu} 1>/dev/null 2>&1;else ${package_listdebian} >/dev/null 2>1;fi
-        for i in ${package_list}; do
+        for i in ${package_list};do
             $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1
         done
         if [[ $lsb_dist == 'ubuntu' ]];then sudo add-apt-repository --remove ppa:ansible/ansible;fi
@@ -133,21 +129,17 @@ while true; do
         echo "\
 [local]
 127.0.0.1 ansible_connection=local" > $invet/$loc
-     fi
+        fi
      grep -qE "inventory      = /etc/ansible/inventories/local" $conf || \
           echo "inventory      = /etc/ansible/inventories/local" >> $conf
   if [[ ! -x $(command -v fail2ban-client) ]];then $(command -v apt) install fail2ban -yqq 1>/dev/null 2>&1; fi
      while true; do
          f2ban=$($(command -v systemctl) is-active fail2ban | grep -qE 'active' && echo true || echo false)
-         if [[ $f2ban != 'true' ]];then
-            echo "Waiting for fail2ban to start" && sleep 1 && continue
-         else
-            break
-         fi
+         if [[ $f2ban != 'true' ]];then echo "Waiting for fail2ban to start" && sleep 1 && continue;else break;fi
      done
      ORGFILE="/etc/fail2ban/jail.conf"
      LOCALMOD="/etc/fail2ban/jail.local"
-  if [[ ! -f $LOCALMOD ]];then cp $ORGFILE $LOCALMOD; fi
+  if [[ ! -f $LOCALMOD ]];then $(command -v rsync) -aq --info=progress2 -hv $ORGFILE $LOCALMOD;fi
      MOD=$(cat $LOCALMOD | grep -qE '\[authelia\]' && echo true || echo false)
   if [[ $MOD == "false" ]];then
      echo "\
@@ -174,26 +166,26 @@ chain = DOCKER-USER">> /etc/fail2ban/jail.local
   if [[ ! -x $(command -v rsync) ]];then $(command -v apt) install --reinstall rsync -yqq 1>/dev/null 2>&1;fi
   $(command -v rsync) /opt/traefik/templates/ /opt/appdata/ -aq --info=progress2 -hv --exclude={'local','installer'}
   basefolder="/opt/appdata"
-  for i in ${basefolder}; do
+  for i in ${basefolder};do
       $(command -v mkdir) -p $i/{authelia,traefik,compose} \
-               $i/traefik/{rules,acme}
+                             $i/traefik/{rules,acme}
       $(command -v find) $i/{authelia,traefik,compose} -exec $(command -v chown) -hR 1000:1000 {} \;
-  done
-  $(command -v touch) ${basefolder}/traefik/acme/acme.json \
-        ${basefolder}/traefik/traefik.log \
-        ${basefolder}/authelia/authelia.log
-  $(command -v chmod) 600 ${basefolder}/traefik/traefik.log \
-            ${basefolder}/authelia/authelia.log \
-            ${basefolder}/traefik/acme/acme.json
+      $(command -v touch) ${basefolder}/traefik/acme/acme.json \
+                          ${basefolder}/traefik/traefik.log \
+                          ${basefolder}/authelia/authelia.log
+      $(command -v chmod) 600 ${basefolder}/traefik/traefik.log \
+                              ${basefolder}/authelia/authelia.log \
+                              ${basefolder}/traefik/acme/acme.json
+  done 
   break
 done
 interface
 }
 oldsinstall() {
   oldsolutions="plexguide cloudbox gooby"
-  for i in ${oldsolutions}; do
+  for i in ${oldsolutions};do
       folders="/var/ /opt/ /home/"
-      for ii in ${folders}; do
+      for ii in ${folders};do
           show=$(find $ii -maxdepth 1 -type d -name $i -print)
           if [[ $show != '' ]];then
              echo ""
@@ -208,7 +200,7 @@ sorry, you need a freshly installed server. We can not install on top of $i\033[
 }
 proxydel() {
 delproxy="apache2 nginx"
-for i in ${delproxy}; do
+for i in ${delproxy};do
     $(command -v systemctl) stop $i 1>/dev/null 2>&1
     $(command -v systemctl) disable $i 1>/dev/null 2>&1
     $(command -v apt) remove $i -yqq 1>/dev/null 2>&1
