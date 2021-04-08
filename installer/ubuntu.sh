@@ -102,7 +102,7 @@ while true; do
         systemctl disable $i >/dev/null 2>&1
      done
   fi
-  if [[ "$(systemd-detect-virt)" == "lxc" ]];then $(command -v bash) ./.subinstall/lxc.sh;fi
+  if [[ "$(systemd-detect-virt)" == "lxc" ]];then $(command -v bash) .subinstall/lxc.sh;fi
   if [[ -x $(command -v lshw) ]];then
      gpu="ntel NVIDIA"
      for i in ${gpu};do
