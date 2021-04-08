@@ -468,7 +468,7 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
   read -erp "Type confirm when you have read the message: " input
-  if [[ "$input" = "confirm" ]];then clear && interface;else clear && setarecord;fi
+  if [[ "$input" = "confirm" ]];then clear;else clear && setarecord;fi
 }
 #setarecord(){
 ### unfinished 
