@@ -102,7 +102,6 @@ while true; do
         systemctl disable $i >/dev/null 2>&1
      done
   fi
-  if [[ "$(systemd-detect-virt)" == "lxc" ]];then $(command -v bash) .subinstall/lxc.sh;fi
   if [[ -x $(command -v lshw) ]];then
      gpu="ntel NVIDIA"
      for i in ${gpu};do
@@ -132,6 +131,7 @@ while true; do
         fi
      grep -qE "inventory      = /etc/ansible/inventories/local" $conf || \
           echo "inventory      = /etc/ansible/inventories/local" >> $conf
+  if [[ "$(systemd-detect-virt)" == "lxc" ]];then $(command -v bash) /opt/traefik/installer/subinstall/lxc.sh;fi
   if [[ ! -x $(command -v fail2ban-client) ]];then $(command -v apt) install fail2ban -yqq 1>/dev/null 2>&1; fi
      while true; do
          f2ban=$($(command -v systemctl) is-active fail2ban | grep -qE 'active' && echo true || echo false)

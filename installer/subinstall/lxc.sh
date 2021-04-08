@@ -17,9 +17,10 @@
 #FUNCTIONS
 LXC() {
   if [[ ! -x $(command -v rsync) ]];then $(command -v apt) install --reinstall rsync -yqq 1>/dev/null 2>&1;fi
-  if [[ ! -f "/home/.lxcstart.sh" ]];then $(command -v rsync) /opt/traefik/installer/.subinstall/lxcstart.sh /home/.lxcstart.sh -aq --info=progress2 -hv;fi
+  if [[ ! -f "/home/.lxcstart.sh" ]];then $(command -v rsync) /opt/traefik/installer/subinstall/lxcstart.sh /home/.lxcstart.sh -aq --info=progress2 -hv;fi
   if [[ -f "/home/.lxcstart.sh" ]];then $(command -v chmod) a=rx,u+w /home/.lxcstart.sh;fi
 ## set cron.d
+  if [[ -f "/home/.lxcstart.sh" ]];then $(command -v ansible-playbook) /opt/traefik/installer/subinstall/lxc.yml 1>/dev/null 2>&1;fi
   if [[ ! -f "/etc/cron.d/lxcstart" ]];then
 cat <<EOF > /etc/cron.d/lxcstart
 SHELL=/bin/bash
