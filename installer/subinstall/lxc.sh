@@ -18,7 +18,11 @@
 LXC() {
   if [[ ! -x $(command -v rsync) ]];then $(command -v apt) install --reinstall rsync -yqq 1>/dev/null 2>&1;fi
   if [[ ! -f "/home/.lxcstart.sh" ]];then $(command -v rsync) /opt/traefik/installer/subinstall/lxcstart.sh /home/.lxcstart.sh -aq --info=progress2 -hv;fi
-  if [[ -f "/home/.lxcstart.sh" ]];then $(command -v chmod) a=rx,u+w /home/.lxcstart.sh;fi
+  if [[ -f "/home/.lxcstart.sh" ]];then 
+     $(command -v chmod) a=rx,u+w /home/.lxcstart.sh
+     $(command -v bash) /home/.lxcstart.sh
+     $(command -v ansible-playbook) /opt/traefik/installer/subinstall/lxc.yml 1>/dev/null 2>&1
+  fi
 ## set cron.d
   if [[ -f "/home/.lxcstart.sh" ]];then $(command -v ansible-playbook) /opt/traefik/installer/subinstall/lxc.yml 1>/dev/null 2>&1;fi
   if [[ ! -f "/etc/cron.d/lxcstart" ]];then
@@ -34,6 +38,9 @@ tee <<-EOF
     Please be sure that you have add the following features 
     keyctl, nesting and fuse under LXC Options > Features, 
     this is only available when Unprivileged container=Yes
+
+    The mount-docker takes round about 2 minutes to start 
+    after the installation, please be patient
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
   read -erp "Confirm Info | PRESS [ENTER]" typed </dev/tty
