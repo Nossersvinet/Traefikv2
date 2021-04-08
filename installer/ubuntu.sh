@@ -537,7 +537,7 @@ clear && interface
 
         Authelia:   https://authelia.${DOMAIN}
         Traefik:    https://traefik.${DOMAIN}
-        Portainer:  https://portainer.${DOMAIN}
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
    fi
