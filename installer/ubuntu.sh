@@ -505,6 +505,7 @@ ccont
 #cd $basefolder/compose && $(command -v docker-compose) up -d --force-recreate 1>/dev/null 2>&1 && sleep 5
 if [[ -f $basefolder/$compose ]];then
    $(command -v cd) $basefolder/compose/
+   $(command -v docker) pull ghcr.io/linuxserver/docker-compose 1>/dev/null 2>&1
    $(command -v docker-compose) config 1>/dev/null 2>&1
    code=$?
    if [[ $code -ne 0 ]];then
