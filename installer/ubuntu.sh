@@ -451,11 +451,11 @@ if [[ -f $env0 ]];then
        echo 'ID=1000' >> $basefolder/compose/.env
 fi
 }
-lang(){
+lang() {
 update-locale LANG=LANG=LC_ALL=en_US.UTF-8 LANGUAGE 1>/dev/null 2>&1
 localectl set-locale LANG=LC_ALL=en_US.UTF-8 1>/dev/null 2>&1
 }
-setarecord(){
+setarecord() {
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     ❌ before we can start the Deploy
@@ -464,9 +464,9 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
   read -erp "Type confirm when you have read the message: " input
-  if [[ "$input" = "confirm" ]];then clear;else clear && setarecord;fi
+  if [[ "$input" = "confirm" ]];then deploynow;else setarecord;fi
 }
-#setarecord(){
+#setarecord() {
 ### unfinished 
 #if [[ ! -x $(command -v jq) ]];then $(command -v apt) install --reinstall jq -yqq 1>/dev/null 2>&1;fi
 #zone=$DOMAIN
@@ -495,7 +495,6 @@ EOF
 deploynow() {
 basefolder="/opt/appdata"
 compose="compose/docker-compose.yml"
-setarecord
 lang
 envcreate
 timezone
@@ -574,8 +573,8 @@ EOF
      4) cfemail && clear && interface ;;
      5) cfkey && clear && interface ;;
      6) cfzoneid && clear && interface ;;
-     d) deploynow && clear && interface ;;
-     D) deploynow && clear && interface ;;
+     d) setarecord && clear && interface ;;
+     D) setarecord && clear && interface ;;
      z) exit 0 ;;
      Z) exit 0 ;;
      *) clear && interface ;;
