@@ -87,8 +87,12 @@ while true; do
   if [[ $networkcheck == "false" ]];then $(command -v docker) network create --driver=bridge proxy 1>/dev/null 2>&1;fi
   if [[ ! -x $(command -v rsync) ]];then $(command -v apt) install --reinstall rsync -yqq 1>/dev/null 2>&1;fi
   if [ ! -x $(command -v docker-compose) ] || [ -x $(command -v docker-compose) ];then
-     $(command -v curl) --silent -L --fail https://raw.githubusercontent.com/linuxserver/docker-docker-compose/master/run.sh -o /usr/local/bin/docker-compose 1>/dev/null 2>&1
-     $(command -v chmod) +x /usr/local/bin/docker-compose 1>/dev/null 2>&1
+     COMPOSE_VERSION=$($(command -v curl) --silent -fsSL https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d\" -f4)
+     sh -c "curl --silent -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose"
+     sh -c "curl --silent -L https://raw.githubusercontent.com/docker/compose/${COMPOSE_VERSION}/contrib/completion/bash/docker-compose > /etc/bash_completion.d/docker-compose"
+     if [[ ! -L "/usr/bin/docker-compose" ]];then $(command -v rm) -f /usr/bin/docker-compose && ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose;fi
+     $(command -v chmod) a=rx,u+w /usr/local/bin/docker-compose >/dev/null 2>&1
+     $(command -v chmod) a=rx,u+w /usr/bin/docker-compose >/dev/null 2>&1
   fi
      dailyapt=$($(command -v systemctl) is-active apt-daily | grep -qE 'active' && echo true || echo false)
      dailyupg=$($(command -v systemctl) is-active apt-daily-upgrade | grep -qE 'active' && echo true || echo false)
