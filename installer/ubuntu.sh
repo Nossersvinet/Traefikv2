@@ -496,21 +496,36 @@ jounanctlpatch
 serverip
 ccont
 #cd $basefolder/compose && $(command -v docker-compose) up -d --force-recreate 1>/dev/null 2>&1 && sleep 5
+$(command -v cd) $basefolder/compose/
 if [[ -f $basefolder/$compose ]];then
-   $(command -v cd) $basefolder/compose/
    $(command -v docker-compose) config 1>/dev/null 2>&1
    code=$?
    if [[ $code -ne 0 ]];then
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     ❌ ERROR
-    compose check has failed
-    Return code is ${code}
+    compose check has failed || Return code is ${code}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
-  read -erp "Confirm Info | PRESS [ENTER]" typed </dev/tty
-clear && interface
-   else
+   read -erp "Confirm Info | PRESS [ENTER]" typed </dev/tty
+   clear && interface
+   fi
+fi
+if [[ -f $basefolder/$compose ]];then
+   $(command -v docker-compose) pull 1>/dev/null 2>&1
+   code=$?
+   if [[ $code -ne 0 ]];then
+tee <<-EOF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    ❌ ERROR
+    compose pull has failed || Return code is ${code}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EOF
+   read -erp "Confirm Info | PRESS [ENTER]" typed </dev/tty
+   clear && interface
+   fi
+fi
+if [[ -f $basefolder/$compose ]];then
    $(command -v docker-compose) up -d --force-recreate 1>/dev/null 2>&1
    source $basefolder/compose/.env
    tee <<-EOF
@@ -528,9 +543,8 @@ clear && interface
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
-   fi
- fi
-interface
+clear && interface
+fi
 }
 ######################################################
 interface() {
