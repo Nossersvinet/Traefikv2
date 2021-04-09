@@ -459,17 +459,6 @@ lang() {
 update-locale LANG=LANG=LC_ALL=en_US.UTF-8 LANGUAGE 1>/dev/null 2>&1
 localectl set-locale LANG=LC_ALL=en_US.UTF-8 1>/dev/null 2>&1
 }
-setarecord() {
-tee <<-EOF
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    ❌ before we can start the Deploy
-    Please add one A Record to ${DOMAIN} with ${SERVERIP}
-    to your CloudFlare Account
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-EOF
-  read -erp "Type confirm when you have read the message: " input
-  if [[ "$input" = "confirm" ]];then deploynow;else setarecord;fi
-}
 #setarecord() {
 ### unfinished 
 #if [[ ! -x $(command -v jq) ]];then $(command -v apt) install --reinstall jq -yqq 1>/dev/null 2>&1;fi
@@ -578,8 +567,8 @@ EOF
      4) cfemail && clear && interface ;;
      5) cfkey && clear && interface ;;
      6) cfzoneid && clear && interface ;;
-     d) setarecord && clear && interface ;;
-     D) setarecord && clear && interface ;;
+     d) deployed && clear && interface ;;
+     D) deploynow && clear && interface ;;
      z) exit 0 ;;
      Z) exit 0 ;;
      *) clear && interface ;;
