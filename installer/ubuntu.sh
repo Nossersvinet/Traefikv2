@@ -567,7 +567,7 @@ EOF
      4) cfemail && clear && interface ;;
      5) cfkey && clear && interface ;;
      6) cfzoneid && clear && interface ;;
-     d) deployed && clear && interface ;;
+     d) deploynow && clear && interface ;;
      D) deploynow && clear && interface ;;
      z) exit 0 ;;
      Z) exit 0 ;;
