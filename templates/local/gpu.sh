@@ -2,7 +2,6 @@
 #
 # Title:      LSPCI || IGPU & NVIDIA GPU
 # Author(s):  mrdoob
-# URL:        https://sudobox.io/
 # GNU:        General Public License v3.0
 ################################################################################
 DREA=$(pidof dockerd 1>/dev/null 2>&1 && echo true || echo false)
