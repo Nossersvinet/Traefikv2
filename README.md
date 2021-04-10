@@ -14,7 +14,8 @@ This guys don't have access to this Repository
 
        And they can't say **We did**
   They just changed spellings nothing else!
-   All the real Contributors you can below 
+All the real Contributors you can see the end 
+
 ```
 ---
 
