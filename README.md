@@ -10,11 +10,11 @@ This is my Repository and not SudoBox LITE !!!
 So if you see a broken part plz report it here !!
 And not on the Forum or Discord of SudoBox.IO
 
-This guys don't have access to this Repository 
+These guys don't have access to this Repository 
 
        And they can't say **We did**
   They just changed spellings nothing else!
-All the real Contributors you can see the end 
+All the real Contributors you can see at the end 
 
 ```
 ---
@@ -42,7 +42,7 @@ Ubuntu 18/20 or Server or Debian 9/10
 
 ```
 Go to your CloudFlare Dashboard
-Add 1 A Record > pointed to the SeverIp
+Add 1 A Record > pointed to the ServerIp
 Copy your CloudFlare-Global-Key and CloudFlare-Zone-ID
 ```
 ---
