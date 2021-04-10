@@ -10,12 +10,16 @@ Ubuntu or Debian
 20GB Disk Space
 ```
 
+---
+
 ## minimum requirement
 ```
 1 VPS / VM / dedicated Sever
 1 Domain
 1 Cloudflare Account  ( free level )
 ```
+
+---
 
 ## pre Install
 
@@ -24,6 +28,7 @@ Go to your CloudFlare Dashboard
 Add 1 A Record > pointed to the SeverIp
 Copy your CloudFlare-Global-Key and CloudFlare-Zone-ID
 ```
+---
 
 Set follow on Cloudflare
 ```
@@ -34,6 +39,7 @@ RocketLoader and Broli / Onion Routing = NO
 Tls min = 1.2
 TLS = v1.3
 ```
+---
 
 ## Install 
 
@@ -47,17 +53,27 @@ cd /opt/traefik && sudo $(command -v bash) install.sh
 ```
 Then just follow the number and Press d/D to deploy
 
-
+----
 
 ## Code and Permissions 
 ```
 Copyright 2021 @doobsi 
-Code owner @doobsi 
+Code owner @doobsi @mrfret
 Dev Code @doobsi 
 Co-Dev -APPS- @mrfret
 ```
 
-Only @mrfret and @doobsi have access to change or pr00f any Pull Request  ( no one other )
+Only @mrfret and @doobsi have access
+to change or pr00f any Pull Request
+( no one other )
+
+---
+
+## FYI
+```
+I am not a team-member of sudobox.io anymore and will not come back.
+```
+
 
 ## Contributors ✨
 
