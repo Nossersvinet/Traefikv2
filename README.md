@@ -50,11 +50,12 @@ Then just follow the number and Press d/D to deploy
 
 
 ## Code and Permissions 
-
+```
 Copyright 2021 @doobsi 
 Code owner @doobsi 
 Dev Code @doobsi 
 Co-Dev -APPS- @mrfret
+```
 
 Only @mrfret and @doobsi have access to change or pr00f any Pull Request  ( no one other )
 
