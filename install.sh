@@ -2,7 +2,6 @@
 #
 # Title:      headinstaller based of matched OS 
 # Author(s):  mrdoob
-# URL:        https://sudobox.io/
 # GNU:        General Public License v3.0
 ################################################
 # Idea from poppabear8883 from UNIT3D
