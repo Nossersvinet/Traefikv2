@@ -1,6 +1,21 @@
-# Traefikv2
-Traefikv2 with Authelia over Cloudflare
 
+## Traefikv2 with Authelia over Cloudflare
+---
+
+## FYI
+```
+I am not a team-member of sudobox.io anymore
+        and will not come back.
+This is my Repository and not SudoBox LITE !!!
+So if you see a broken part plz report it here !!
+And not on the Forum or Discord of SudoBox.IO
+
+This guys don't have access to this Repository 
+
+       And they can't say **We did**
+  They just changed spellings nothing else!
+   All the real Contributors you can below 
+```
 ---
 
 ## minimum specs 
@@ -69,11 +84,6 @@ to change or pr00f any Pull Request
 ( no one other )
 
 ---
-
-## FYI
-```
-I am not a team-member of sudobox.io anymore and will not come back.
-```
 
 
 ## Contributors ✨
