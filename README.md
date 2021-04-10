@@ -64,7 +64,7 @@ TLS = v1.3
 $(command -v apt) update
 $(command -v apt) upgrade 
 sudo $(command -v apt) install git
-sudo git clone  https://github.com/doob187/Traefikv2.git /opt/traefik
+sudo git clone https://github.com/doob187/Traefikv2.git /opt/traefik
 
 cd /opt/traefik && sudo $(command -v bash) install.sh
 ```
