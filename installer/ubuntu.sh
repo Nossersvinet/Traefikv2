@@ -3,7 +3,6 @@
 # Title:      Traefikv2 with Authelia over Cloudflare
 # OS Branch:  ubuntu,debian,rasbian
 # Author(s):  mrdoob
-# URL:        https://sudobox.io/
 # GNU:        General Public License v3.0
 ################################################################################
 # shellcheck disable=SC2003
