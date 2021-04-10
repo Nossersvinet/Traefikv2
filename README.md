@@ -1,10 +1,11 @@
 # Traefikv2
 Traefikv2 with Authelia over Cloudflare
 
-## minimum specs 
+---
 
-Ubuntu or Debian
+## minimum specs 
 ```
+Ubuntu 18/20 or Server or Debian 9/10
 2 Cores
 4GB Ram
 20GB Disk Space
@@ -32,7 +33,7 @@ Copy your CloudFlare-Global-Key and CloudFlare-Zone-ID
 
 Set follow on Cloudflare
 ```
-SSL = FULL ( not FULL/STRICT
+SSL = FULL ( not FULL/STRICT )
 Always on = YES
 http to https = YES
 RocketLoader and Broli / Onion Routing = NO
