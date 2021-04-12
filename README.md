@@ -10,10 +10,6 @@ This is my Repository and not SudoBox LITE !!!
 So if you see a broken part plz report it here !!
 And not on the Forum or Discord of SudoBox.IO
 
-These guys don't have access to this Repository 
-
-       And they can't say **We did**
-  They just changed spellings nothing else!
 All the real Contributors you can see at the end 
 
 ```
