@@ -67,7 +67,7 @@ services:
       - 'CLOUDFLARE_EMAIL=example-CF-EMAIL'
       - 'CLOUDFLARE_API_KEY=example-CF-API-KEY'
     labels:
-      - 'dockupdater.enable=false'
+      - 'dockupdater.enable=true'
       - 'traefik.enable=true'
       - 'traefik.http.routers.http-catchall.entrypoints=http'
       - 'traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)'
@@ -105,6 +105,9 @@ services:
       - 'REFRESH_ENTRIES=TRUE'
       - 'DOCKER_ENTRYPOINT=unix://var/run/docker.sock'
       - 'SWARM_MODE=FALSE'
+    labels:
+      - 'dockupdater.enable=true'
+
 
   traefik-error-pages:
     container_name: 'traefik-error-pages'
