@@ -55,9 +55,9 @@ while true; do
   fi
   if [[ ! -x $(command -v docker) ]];then
      if [[ -r /etc/os-release ]];then lsb_dist="$(. /etc/os-release && echo "$ID")"; fi
-        package_listubuntu="apt-transport-https ca-certificates curl wget gnupg-agent"
-        package_listdebian="apt-transport-https ca-certificates curl wget gnupg-agent gnupg2"
-        package_basic="software-properties-common language-pack-en-base pciutils lshw nano rsync fuse curl"
+        package_listubuntu="apt-transport-https ca-certificates gnupg-agent"
+        package_listdebian="apt-transport-https ca-certificates gnupg-agent gnupg2"
+        package_basic="software-properties-common language-pack-en-base pciutils lshw nano rsync fuse curl wget"
         if [[ $lsb_dist == 'ubuntu' ]] || [[ $lsb_dist == 'rasbian' ]];then
            for i in ${package_listubuntu};do
                echo "Now installing $i" && $(command -v apt) install $i --reinstall -yqq 1>/dev/null 2>&1 && sleep 1
