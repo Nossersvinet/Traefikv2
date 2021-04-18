@@ -13,7 +13,6 @@
 # shellcheck disable=SC2196
 # shellcheck disable=SC2046
 #FUNCTIONS
-
 updatesystem() {
 if [[ $EUID -ne 0 ]];then
 tee <<-EOF
@@ -142,7 +141,6 @@ while true; do
      MOD=$(cat $LOCALMOD | grep -qE '\[authelia\]' && echo true || echo false)
   if [[ $MOD == "false" ]];then
      echo "\
-
 [authelia]
 enabled = true
 port = http,https,9091
@@ -210,24 +208,17 @@ done
 domain() {
 basefolder="/opt/appdata"
 tee <<-EOF
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 Traefik v2 Domain
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 DNS records will not be automatically added with the following 
 TLD Domains 
-
 .a, .cf, .ga, .gq, .ml or .tk 
-
 Cloudflare has limited their API so you will have to manually add these 
 records yourself via the Cloudflare dashboard.
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 EOF
    read -erp "Which domain would you like to use?: " DOMAIN
-
 if [[ $DOMAIN == "" ]];then
    echo "Domain cannot be empty"
    domain
@@ -256,14 +247,11 @@ interface
 displayname() {
 basefolder="/opt/appdata"
 tee <<-EOF
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 Authelia Username
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 EOF
    read -erp "Enter your username for Authelia (eg. John Doe): " DISPLAYNAME
-
 if [[ $DISPLAYNAME != "" ]];then
    if [[ $(uname) == "Darwin" ]];then
       sed -i '' "s/<DISPLAYNAME>/$DISPLAYNAME/g" $basefolder/authelia/users_database.yml
@@ -278,18 +266,14 @@ else
 fi
 interface
 }
-
 password() {
 basefolder="/opt/appdata"
 tee <<-EOF
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 Authelia Password
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 EOF
    read -erp "Enter a password for $USERNAME: " PASSWORD
-
 if [[ $PASSWORD != "" ]];then
    $(command -v docker) pull authelia/authelia -q > /dev/null
    PASSWORD=$($(command -v docker) run authelia/authelia authelia hash-password $PASSWORD -i 2 -k 32 -m 128 -p 8 -l 32 | sed 's/Password hash: //g')
@@ -313,14 +297,11 @@ interface
 cfemail() {
 basefolder="/opt/appdata"
 tee <<-EOF
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 Cloudflare Email-Address
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 EOF
    read -erp "What is your CloudFlare Email Address : " EMAIL
-
 if [[ $EMAIL != "" ]];then
    if [[ $(uname) == "Darwin" ]];then
       sed -i '' "s/example-CF-EMAIL/$EMAIL/g" $basefolder/authelia/{configuration.yml,users_database.yml}
@@ -338,14 +319,11 @@ interface
 cfkey() {
 basefolder="/opt/appdata"
 tee <<-EOF
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 Cloudflare Global-Key
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 EOF
    read -erp "What is your CloudFlare Global Key: " CFGLOBAL
-
 if [[ $CFGLOBAL != "" ]];then
    if [[ $(uname) == "Darwin" ]];then
       sed -i '' "s/example-CF-API-KEY/$CFGLOBAL/g" $basefolder/authelia/configuration.yml
@@ -363,14 +341,11 @@ interface
 cfzoneid() {
 basefolder="/opt/appdata"
 tee <<-EOF
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 Cloudflare Zone-ID
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 EOF
    read -erp "Whats your CloudFlare Zone ID: " CFZONEID
-
 if [[ $CFZONEID != "" ]];then
    if [[ $(uname) == "Darwin" ]];then
       sed -i '' "s/example-CF-ZONE_ID/$CFZONEID/g" $basefolder/compose/docker-compose.yml
@@ -383,7 +358,6 @@ else
 fi
 interface
 }
-
 jounanctlpatch() {
 CTPATCH=$(cat /etc/systemd/journald.conf | grep "#PATCH" && echo true || echo false)
 if [[ $CTPATCH == "false" ]];then
@@ -392,7 +366,6 @@ if [[ $CTPATCH == "false" ]];then
    journalctl --vacuum-time=1s 1>/dev/null 2>&1
    $(command -v find) /var/log -name "*.gz" -delete 1>/dev/null 2>&1
    echo "\
-
 #PATCH
 Storage=volatile
 Compress=yes
@@ -418,7 +391,6 @@ else
    serverip
 fi
 }
-
 ccont() {
 container=$($(command -v docker) ps -aq --format '{{.Names}}' | grep -E 'trae|auth|error-pag')
 for i in ${container}; do
@@ -465,24 +437,20 @@ localectl set-locale LANG=LC_ALL=en_US.UTF-8 1>/dev/null 2>&1
 #dnsrecord=$DOMAIN
 #cloudflare_auth_email=$EMAIL
 #cloudflare_auth_key=$CFGLOBAL
-
 #zoneid=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=$zone&status=active" \
 #  -H "X-Auth-Email: $cloudflare_auth_email" \
 #  -H "Authorization: Bearer $cloudflare_auth_key" \
 #  -H "Content-Type: application/json" | jq -r '{"result"}[] | .[0] | .id')
-
 #dnsrecordid=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$zoneid/dns_records?type=A&name=$dnsrecord" \
 #  -H "X-Auth-Email: $cloudflare_auth_email" \
 #  -H "Authorization: Bearer $cloudflare_auth_key" \
 #  -H "Content-Type: application/json" | jq -r '{"result"}[] | .[0] | .id')
-
 #curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$zoneid/dns_records/$dnsrecordid" \
 #  -H "X-Auth-Email: $cloudflare_auth_email" \
 #  -H "Authorization: Bearer $cloudflare_auth_key" \
 #  -H "Content-Type: application/json" \
 # --data "{\"type\":\"A\",\"name\":\"$dnsrecord\",\"content\":\"$ip\",\"ttl\":1,\"proxied\":false}" | jq
 #}
-
 ##############
 deploynow() {
 basefolder="/opt/appdata"
@@ -534,12 +502,9 @@ if [[ -f $basefolder/$compose ]];then
 	   Traefik v2 with Authelia is deployed
       Please Wait some minutes Authelia and Traefik 
 	 need some minutes to start all services
-
         Access to the apps are only over https://
-
         Authelia:   https://authelia.${DOMAIN}
         Traefik:    https://traefik.${DOMAIN}
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
 clear && interface
@@ -548,31 +513,23 @@ fi
 ######################################################
 interface() {
 tee <<-EOF
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 Traefik v2 with Authelia over Cloudflare
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 [1] Domain                            [ $DOMAIN ]
 [2] Authelia Username                 [ $DISPLAYNAME ]
 [3] Authelia Password                 [ $PASSWORD ]
 [4] CloudFlare-Email-Address          [ $EMAIL ]
 [5] CloudFlare-Global-Key             [ $CFGLOBAL ]
 [6] CloudFlare-Zone-ID                [ $CFZONEID ]
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 [D] Deploy Traefik v2 with Authelia
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 [Z] - Exit
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 EOF
   read -erp '↘️  Type Number | Press [ENTER]: ' typed </dev/tty
-
   case $typed in
-
      1) domain && clear && interface ;;
      2) displayname && clear && interface ;;
      3) password && clear && interface ;;
@@ -584,7 +541,6 @@ EOF
      z) exit 0 ;;
      Z) exit 0 ;;
      *) clear && interface ;;
-
   esac
 }
 # FUNCTIONS END ##############################################################

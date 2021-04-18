@@ -41,7 +41,6 @@ tee <<-EOF
     Please be sure that you have add the following features 
     keyctl, nesting and fuse under LXC Options > Features, 
     this is only available when Unprivileged container=Yes
-
     The mount-docker takes round about 2 minutes to start 
     after the installation, please be patient
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -49,8 +48,8 @@ EOF
   read -erp "Confirm Info | PRESS [ENTER]" input </dev/tty
   if [[ "$input" = "confirm" ]];then clear; else ending;fi
 }
-
 while true; do
  if [[ "$(systemd-detect-virt)" != "lxc" ]];then exit;fi
  LXC
 done
+#EOF
