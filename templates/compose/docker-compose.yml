@@ -1,3 +1,4 @@
+---
 version: '3.3'
 services:
   traefik:
@@ -77,7 +78,6 @@ services:
       - 'traefik.http.routers.traefik-rtr.rule=HostHeader(`traefik.example.com`)'
       - 'traefik.http.routers.traefik-rtr.service=api@internal'
       - 'traefik.http.routers.traefik-rtr.middlewares=chain-authelia@file'
-
   cf-companion:
     container_name: 'cf-companion'
     image: 'tiredofit/traefik-cloudflare-companion:latest'
@@ -107,8 +107,6 @@ services:
       - 'SWARM_MODE=FALSE'
     labels:
       - 'dockupdater.enable=true'
-
-
   traefik-error-pages:
     container_name: 'traefik-error-pages'
     image: 'guillaumebriday/traefik-custom-error-pages'
@@ -134,7 +132,6 @@ services:
       - 'traefik.http.middlewares.traefik-error-pages.errors.status=401,403,404,429,500,502,503'
       - 'traefik.http.middlewares.traefik-error-pages.errors.query=/{status}.html'
       - 'traefik.http.services.traefik-error-pages-svc.loadbalancer.server.port=80'
-
   authelia:
     container_name: 'authelia'
     image: 'authelia/authelia:latest'
@@ -158,7 +155,6 @@ services:
       - 'traefik.http.routers.authelia-rtr.tls=true'
       - 'traefik.http.routers.authelia-rtr.service=authelia-svc'
       - 'traefik.http.services.authelia-svc.loadbalancer.server.port=9091'
-
 networks:
   proxy:
     driver: bridge

@@ -1,3 +1,6 @@
+###############################################################
+#                   Treaifk configuration                     #
+###############################################################
 [http.middlewares]
   [http.middlewares.middlewares-rate-limit]
     [http.middlewares.middlewares-rate-limit.rateLimit]

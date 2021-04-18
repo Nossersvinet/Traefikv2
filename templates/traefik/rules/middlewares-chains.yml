@@ -1,3 +1,6 @@
+###############################################################
+#                   Treaifk configuration                     #
+###############################################################
 http:
   middlewares:
     chain-no-auth:
@@ -12,3 +15,4 @@ http:
           - middlewares-rate-limit
           - middlewares-secure-headers
           - middlewares-authelia
+

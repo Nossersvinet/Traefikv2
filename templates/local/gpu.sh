@@ -20,7 +20,6 @@ INTE=$(ls /usr/bin/intel_gpu_* 1>/dev/null 2>&1 && echo true || echo false)
 IGPU=$(lspci | grep -i --color 'vga\|3d\|2d' | grep -E 'ntel' 1>/dev/null 2>&1 && echo true || echo false)
 NGPU=$(lspci | grep -i --color 'vga\|3d\|2d' | grep -E 'NVIDIA' 1>/dev/null 2>&1 && echo true || echo false)
 DIST=$(. /etc/os-release;echo $ID$VERSION_ID)
-
 igpuhetzner() {
 if [[ $HMOD == "false" ]];then exit 0; fi
 if [[ $ITEL == "false" ]];then sed -i "s/blacklist i915/#blacklist i915/g" /etc/modprobe.d/blacklist-hetzner.conf; fi
@@ -87,3 +86,4 @@ while true; do
   elif [[ $NGPU == "true" && $IGPU == "false" ]];then nvidiagpu && break && exit
   else break && exit;fi
 done
+#EOF
