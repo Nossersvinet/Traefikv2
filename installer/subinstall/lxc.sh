@@ -31,6 +31,10 @@ SHELL=/bin/bash
 EOF
 $(command -v chmod) a=rx,u+w /etc/cron.d/lxcstart
 sleep 1
+fi
+ending && clear && exit
+]
+ending() {
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     ❌ INFO
@@ -43,9 +47,9 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
   read -erp "Confirm Info | PRESS [ENTER]" typed </dev/tty
-fi
-clear && exit
+  if [[ "$input" = "confirm" ]];then clear; else ending;fi
 }
+
 while true; do
  if [[ "$(systemd-detect-virt)" != "lxc" ]];then exit;fi
  LXC
