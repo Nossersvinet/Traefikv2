@@ -45,7 +45,7 @@ tee <<-EOF
     after the installation, please be patient
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
-  read -erp "Confirm Info | PRESS [ENTER]" input </dev/tty
+  read -erp "Confirm Info | Type confirm & PRESS [ENTER]" input </dev/tty
   if [[ "$input" = "confirm" ]];then clear; else ending;fi
 }
 while true;do
