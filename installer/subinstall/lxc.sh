@@ -33,7 +33,7 @@ $(command -v chmod) a=rx,u+w /etc/cron.d/lxcstart
 sleep 1
 fi
 ending && clear && exit
-]
+}
 ending() {
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -48,8 +48,7 @@ EOF
   read -erp "Confirm Info | PRESS [ENTER]" input </dev/tty
   if [[ "$input" = "confirm" ]];then clear; else ending;fi
 }
-while true; do
- if [[ "$(systemd-detect-virt)" != "lxc" ]];then exit;fi
- LXC
+while true;do
+ if [[ "$(systemd-detect-virt)" != "lxc" ]];then exit;else LXC;fi
 done
 #EOF
