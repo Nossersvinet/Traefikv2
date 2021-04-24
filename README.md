@@ -13,6 +13,20 @@ And not on the Forum or Discord of SudoBox.IO
 All the real Contributors you can see at the end 
 
 ```
+
+
+## You need Help 
+
+```
+https://discord.gg/A7h7bKBCVa
+```
+Or create one issue 
+```
+https://github.com/doob187/Traefikv2/issues
+```
+
+
+
 ---
 
 ## minimum specs 
