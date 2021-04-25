@@ -71,9 +71,16 @@ TLS = v1.3
 ## Use the easy mode installer 
 
 ```
-sudo wget https://raw.githubusercontent.com/doob187/traefikv2installer/main/wgetfile.sh -O /home/install.sh && sudo bash /home/install.sh
+Long Line
+sudo wget -qO- https://raw.githubusercontent.com/doob187/traefikv2installer/main/wgetfile.sh | sudo bash
 
+or 
+
+Short Line
+sudo wget -qO- https://git.io/JO7vg | sudo bash
 ```
+
+
 Then just follow the number and Press d/D to deploy
 
 ----
