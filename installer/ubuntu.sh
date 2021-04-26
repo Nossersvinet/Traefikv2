@@ -536,10 +536,8 @@ EOF
      4) cfemail && clear && interface ;;
      5) cfkey && clear && interface ;;
      6) cfzoneid && clear && interface ;;
-     d) deploynow && clear && interface ;;
-     D) deploynow && clear && interface ;;
-     z) exit 0 ;;
-     Z) exit 0 ;;
+     d|D) deploynow && clear && interface ;;
+     z|Z) clear && exit ;;
      *) clear && interface ;;
   esac
 }
