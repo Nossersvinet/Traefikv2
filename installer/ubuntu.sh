@@ -13,7 +13,7 @@
 # shellcheck disable=SC2196
 # shellcheck disable=SC2046
 #FUNCTIONS
-systemtest() {
+updatesystem() {
 if [[ $EUID -ne 0 ]];then
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -22,8 +22,6 @@ tee <<-EOF
 EOF
 exit 0
 fi
-}
-updatesystem() {
 while true; do
   basefolder="/opt/appdata"
   oldsinstall && proxydel
@@ -220,7 +218,7 @@ Cloudflare has limited their API so you will have to manually add these
 records yourself via the Cloudflare dashboard.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
-   read -erp "Which domain would you like to use?: " DOMAIN
+   read -erp "Which domain would you like to use?: " DOMAIN </dev/tty
 if [[ $DOMAIN == "" ]];then
    echo "Domain cannot be empty"
    domain
@@ -253,7 +251,7 @@ tee <<-EOF
 🚀 Authelia Username
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
-   read -erp "Enter your username for Authelia (eg. John Doe): " DISPLAYNAME
+   read -erp "Enter your username for Authelia (eg. John Doe): " DISPLAYNAME </dev/tty
 if [[ $DISPLAYNAME != "" ]];then
    if [[ $(uname) == "Darwin" ]];then
       sed -i '' "s/<DISPLAYNAME>/$DISPLAYNAME/g" $basefolder/authelia/users_database.yml
@@ -275,7 +273,7 @@ tee <<-EOF
 🚀 Authelia Password
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
-   read -erp "Enter a password for $USERNAME: " PASSWORD
+   read -erp "Enter a password for $USERNAME: " PASSWORD </dev/tty
 if [[ $PASSWORD != "" ]];then
    $(command -v docker) pull authelia/authelia -q > /dev/null
    PASSWORD=$($(command -v docker) run authelia/authelia authelia hash-password $PASSWORD -i 2 -k 32 -m 128 -p 8 -l 32 | sed 's/Password hash: //g')
@@ -303,7 +301,7 @@ tee <<-EOF
 🚀 Cloudflare Email-Address
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
-   read -erp "What is your CloudFlare Email Address : " EMAIL
+   read -erp "What is your CloudFlare Email Address : " EMAIL </dev/tty
 if [[ $EMAIL != "" ]];then
    if [[ $(uname) == "Darwin" ]];then
       sed -i '' "s/example-CF-EMAIL/$EMAIL/g" $basefolder/authelia/{configuration.yml,users_database.yml}
@@ -325,7 +323,7 @@ tee <<-EOF
 🚀 Cloudflare Global-Key
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
-   read -erp "What is your CloudFlare Global Key: " CFGLOBAL
+   read -erp "What is your CloudFlare Global Key: " CFGLOBAL </dev/tty
 if [[ $CFGLOBAL != "" ]];then
    if [[ $(uname) == "Darwin" ]];then
       sed -i '' "s/example-CF-API-KEY/$CFGLOBAL/g" $basefolder/authelia/configuration.yml
@@ -347,7 +345,7 @@ tee <<-EOF
 🚀 Cloudflare Zone-ID
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
-   read -erp "Whats your CloudFlare Zone ID: " CFZONEID
+   read -erp "Whats your CloudFlare Zone ID: " CFZONEID </dev/tty
 if [[ $CFZONEID != "" ]];then
    if [[ $(uname) == "Darwin" ]];then
       sed -i '' "s/example-CF-ZONE_ID/$CFZONEID/g" $basefolder/compose/docker-compose.yml
@@ -518,20 +516,25 @@ tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🚀 Traefik v2 with Authelia over Cloudflare
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 [1] Domain                            [ $DOMAIN ]
 [2] Authelia Username                 [ $DISPLAYNAME ]
 [3] Authelia Password                 [ $PASSWORD ]
 [4] CloudFlare-Email-Address          [ $EMAIL ]
 [5] CloudFlare-Global-Key             [ $CFGLOBAL ]
 [6] CloudFlare-Zone-ID                [ $CFZONEID ]
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 [D] Deploy Traefik v2 with Authelia
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[Z] - Exit
+[ EXIT or Z ] - Exit
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
-  read -erp '↘️  Type Number | Press [ENTER]: ' installer </dev/tty
-  case $installer in
+
+  read -erp '↘️  Type Number | Press [ENTER]: ' headtyped </dev/tty
+  case $headtyped in
      1) domain && clear && interface ;;
      2) displayname && clear && interface ;;
      3) password && clear && interface ;;
@@ -544,5 +547,5 @@ EOF
   esac
 }
 # FUNCTIONS END ##############################################################
-systemtest
 updatesystem
+#EOF
