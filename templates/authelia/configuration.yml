@@ -37,13 +37,14 @@ access_control:
     - domain: authelia.example.com
       policy: bypass
     ## bypass rule for apps
-    ## bypass rules for api / trigges
+    ## bypass rules for api / trigges / rss
     - domain: "*.example.com"
       policy: bypass
       resources:
         - "^/api.*$"
         - "^/identity.*$"
         - "^/triggers/*$"
+        - "^/rss/*$"
     ## one factor login 
     - domain: "*.example.com"
       policy: one_factor
