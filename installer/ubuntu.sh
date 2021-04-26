@@ -242,7 +242,7 @@ else
       fi
    fi
 fi
-interface
+clear && interface
 }
 displayname() {
 basefolder="/opt/appdata"
@@ -264,7 +264,7 @@ else
   echo "Display name cannot be empty"
   displayname
 fi
-interface
+clear && interface
 }
 password() {
 basefolder="/opt/appdata"
@@ -292,7 +292,7 @@ else
    echo "Password cannot be empty"
    password
 fi
-interface
+clear && interface
 }
 cfemail() {
 basefolder="/opt/appdata"
@@ -314,7 +314,7 @@ else
   echo "CloudFlare Email Address cannot be empty"
   cfemail
 fi
-interface
+clear && interface
 }
 cfkey() {
 basefolder="/opt/appdata"
@@ -336,7 +336,7 @@ else
    echo "CloudFlare Global Key cannot be empty"
    cfkey
 fi
-interface
+clear && interface
 }
 cfzoneid() {
 basefolder="/opt/appdata"
@@ -356,7 +356,7 @@ else
    echo "CloudFlare Zone ID cannot be empty"
    cfzoneid
 fi
-interface
+clear && interface
 }
 jounanctlpatch() {
 CTPATCH=$(cat /etc/systemd/journald.conf | grep "#PATCH" && echo true || echo false)
@@ -535,13 +535,13 @@ EOF
 
   read -erp '↘️  Type Number | Press [ENTER]: ' headtyped </dev/tty
   case $headtyped in
-     1) domain && clear && interface ;;
-     2) displayname && clear && interface ;;
-     3) password && clear && interface ;;
-     4) cfemail && clear && interface ;;
-     5) cfkey && clear && interface ;;
-     6) cfzoneid && clear && interface ;;
-     d|D) deploynow && clear && interface ;;
+     1) domain ;;
+     2) displayname ;;
+     3) password ;;
+     4) cfemail ;;
+     5) cfkey ;;
+     6) cfzoneid ;;
+     d|D) deploynow ;;
      Z|z|exit|EXIT|Exit|close) exit ;;
      *) clear && interface ;;
   esac
