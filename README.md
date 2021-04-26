@@ -1,11 +1,10 @@
 
 ## Traefikv2 with Authelia over Cloudflare
----
+----
 
 ## FYI
+
 ```
-
-
 So if you see a broken part plz report it here
            over githube issues
            or on the Discord
@@ -27,7 +26,7 @@ https://github.com/doob187/Traefikv2/issues
 
 
 
----
+----
 
 ## minimum specs 
 ```
@@ -37,7 +36,7 @@ Ubuntu 18/20 or Server or Debian 9/10
 20GB Disk Space
 ```
 
----
+----
 
 ## minimum requirement
 ```
@@ -46,7 +45,7 @@ Ubuntu 18/20 or Server or Debian 9/10
 1 Cloudflare Account  ( free level )
 ```
 
----
+----
 
 ## pre Install
 
@@ -55,7 +54,7 @@ Go to your CloudFlare Dashboard
 Add 1 A Record > pointed to the ServerIp
 Copy your CloudFlare-Global-Key and CloudFlare-Zone-ID
 ```
----
+----
 
 Set follow on Cloudflare
 ```
@@ -66,18 +65,18 @@ RocketLoader and Broli / Onion Routing = NO
 Tls min = 1.2
 TLS = v1.3
 ```
----
+----
 
-## Use the easy mode installer 
+## Easy Mode install
 
 ```
 Long Line
 sudo wget -qO- https://raw.githubusercontent.com/doob187/traefikv2installer/main/wgetfile.sh | sudo bash
 
-or 
+short liner
 
-Short Line
 sudo wget -qO- https://git.io/JO7vg | sudo bash
+
 ```
 
 
@@ -97,7 +96,7 @@ Only @mrfret and @doobsi have access
 to change or pr00f any Pull Request
 ( no one other )
 
----
+----
 
 
 ## Contributors ✨
