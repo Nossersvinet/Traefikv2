@@ -209,13 +209,16 @@ domain() {
 basefolder="/opt/appdata"
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 Traefik v2 Domain
+   🚀   Traefik v2 Domain
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-DNS records will not be automatically added with the following 
-TLD Domains 
-.a, .cf, .ga, .gq, .ml or .tk 
-Cloudflare has limited their API so you will have to manually add these 
-records yourself via the Cloudflare dashboard.
+
+     DNS records will not be automatically added
+           with the following TLD Domains 
+           .a, .cf, .ga, .gq, .ml or .tk 
+     Cloudflare has limited their API so you
+          will have to manually add these 
+   records yourself via the Cloudflare dashboard.
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
    read -erp "Which domain would you like to use?: " DOMAIN </dev/tty
@@ -248,7 +251,7 @@ displayname() {
 basefolder="/opt/appdata"
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 Authelia Username
+   🚀   Authelia Username
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
    read -erp "Enter your username for Authelia (eg. John Doe): " DISPLAYNAME </dev/tty
@@ -270,7 +273,7 @@ password() {
 basefolder="/opt/appdata"
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 Authelia Password
+   🚀   Authelia Password
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
    read -erp "Enter a password for $USERNAME: " PASSWORD </dev/tty
@@ -298,7 +301,7 @@ cfemail() {
 basefolder="/opt/appdata"
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 Cloudflare Email-Address
+   🚀   Cloudflare Email-Address
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
    read -erp "What is your CloudFlare Email Address : " EMAIL </dev/tty
@@ -320,7 +323,7 @@ cfkey() {
 basefolder="/opt/appdata"
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 Cloudflare Global-Key
+   🚀   Cloudflare Global-Key
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
    read -erp "What is your CloudFlare Global Key: " CFGLOBAL </dev/tty
@@ -342,7 +345,7 @@ cfzoneid() {
 basefolder="/opt/appdata"
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 Cloudflare Zone-ID
+   🚀   Cloudflare Zone-ID
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
    read -erp "Whats your CloudFlare Zone ID: " CFZONEID </dev/tty
@@ -484,8 +487,24 @@ if [[ -f $basefolder/$compose ]];then
    if [[ $code -ne 0 ]];then
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    ❌ ERROR
-    compose pull has failed || Return code is ${code}
+
+        ❌ ERROR compose pull has failed
+	          Return code is ${code}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EOF
+   read -erp "Confirm Info | PRESS [ENTER]" typed </dev/tty
+   clear && interface
+   fi
+fi
+if [[ -f $basefolder/$compose ]];then
+   $(command -v docker-compose) config 1>/dev/null 2>&1
+   code=$?
+   if [[ $code -ne 0 ]];then
+tee <<-EOF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+        ❌ ERROR compose config has failed
+	          Return code is ${code}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
    read -erp "Confirm Info | PRESS [ENTER]" typed </dev/tty
@@ -497,12 +516,14 @@ if [[ -f $basefolder/$compose ]];then
    source $basefolder/compose/.env
    tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   🚀 Traefik v2 with Authelia
+      🚀   Traefik v2 with Authelia
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-	   Traefik v2 with Authelia is deployed
-      Please Wait some minutes Authelia and Traefik 
-	 need some minutes to start all services
-        Access to the apps are only over https://
+ 	   Traefik v2 with Authelia is deployed
+    Please Wait some minutes Authelia and Traefik 
+     need some minutes to start all services
+
+     Access to the apps are only over https://
+
         Authelia:   https://authelia.${DOMAIN}
         Traefik:    https://traefik.${DOMAIN}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -514,15 +535,15 @@ fi
 interface() {
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚀 Traefik v2 with Authelia over Cloudflare
+   🚀   Traefik v2 with Authelia over Cloudflare
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-[1] Domain                            [ $DOMAIN ]
-[2] Authelia Username                 [ $DISPLAYNAME ]
-[3] Authelia Password                 [ $PASSWORD ]
-[4] CloudFlare-Email-Address          [ $EMAIL ]
-[5] CloudFlare-Global-Key             [ $CFGLOBAL ]
-[6] CloudFlare-Zone-ID                [ $CFZONEID ]
+   [1] Domain                         [ $DOMAIN ]
+   [2] Authelia Username              [ $DISPLAYNAME ]
+   [3] Authelia Password              [ $PASSWORD ]
+   [4] CloudFlare-Email-Address       [ $EMAIL ]
+   [5] CloudFlare-Global-Key          [ $CFGLOBAL ]
+   [6] CloudFlare-Zone-ID             [ $CFZONEID ]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
