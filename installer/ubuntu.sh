@@ -13,7 +13,7 @@
 # shellcheck disable=SC2196
 # shellcheck disable=SC2046
 #FUNCTIONS
-updatesystem() {
+systemtest() {
 if [[ $EUID -ne 0 ]];then
 tee <<-EOF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -22,6 +22,8 @@ tee <<-EOF
 EOF
 exit 0
 fi
+}
+updatesystem() {
 while true; do
   basefolder="/opt/appdata"
   oldsinstall && proxydel
@@ -528,8 +530,8 @@ tee <<-EOF
 [Z] - Exit
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EOF
-  read -erp '↘️  Type Number | Press [ENTER]: ' typed </dev/tty
-  case $typed in
+  read -erp '↘️  Type Number | Press [ENTER]: ' installer </dev/tty
+  case $installer in
      1) domain && clear && interface ;;
      2) displayname && clear && interface ;;
      3) password && clear && interface ;;
@@ -537,9 +539,10 @@ EOF
      5) cfkey && clear && interface ;;
      6) cfzoneid && clear && interface ;;
      d|D) deploynow && clear && interface ;;
-     z|Z) clear && exit ;;
+     Z|z|exit|EXIT|Exit|close) exit ;;
      *) clear && interface ;;
   esac
 }
 # FUNCTIONS END ##############################################################
+systemtest
 updatesystem
